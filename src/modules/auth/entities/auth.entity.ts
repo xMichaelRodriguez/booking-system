@@ -3,7 +3,7 @@ import { Exclude, Expose } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsUUID } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'users' })
 export default class User {
   @ApiProperty({
     example: '1',
@@ -47,6 +47,13 @@ export default class User {
   })
   @Column({ type: 'boolean', name: 'is_active', default: false })
   isActive?: boolean;
+
+  @ApiProperty({
+    example: 'false',
+    description: 'column of the user is active account',
+  })
+  @Column({ type: 'boolean', name: 'is_google_account' })
+  isGoogleAccount: boolean;
 
   @ApiProperty({
     example: 'example-token',
