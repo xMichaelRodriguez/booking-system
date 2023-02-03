@@ -6,6 +6,7 @@ import { redisStore } from 'cache-manager-redis-store';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { MailModule } from './modules/mail/mail.module';
+import { RolesModule } from './modules/roles/roles.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { MailModule } from './modules/mail/mail.module';
     }),
     AuthModule,
     MailModule,
+    RolesModule,
   ],
   controllers: [],
   providers: [],

@@ -53,11 +53,12 @@ describe('AuthController', () => {
 
   it('should return a token and user data on successful login', async () => {
     const loginAuthDto = { email: 'test@example.com', password: 'test' };
-    const user: IUser = {
+    const user = {
       id: 1,
       username: 'test',
       email: 'test@example.com',
-    };
+      isGoogleAccount: false,
+    } as User;
 
     const accessToken = 'test-token';
     jest.spyOn(service, 'login').mockImplementation(

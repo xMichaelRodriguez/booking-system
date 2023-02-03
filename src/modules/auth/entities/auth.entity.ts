@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsUUID } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Role } from 'src/modules/roles/entities/role.entity';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'users' })
 export default class User {
@@ -82,6 +83,9 @@ export default class User {
     nullable: true,
   })
   resetPasswordToken?: string;
+
+  @ManyToMany(() => Role, role => role.users, { eager: true })
+  roles: Role[];
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
