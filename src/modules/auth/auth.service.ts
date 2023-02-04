@@ -44,12 +44,12 @@ export class AuthService {
       const plainTextToHash = await this.encoderService.encodePassword(
         password,
       );
-      const user = await this.userReposity.save({
+      const user = await this.userReposity.create({
         ...createAuthDto,
         password: plainTextToHash,
         activationToken: v4(),
       });
-
+      await this.userReposity.save(user);
       await this.mailService.sendVerificationUsers(user, user.activationToken);
       return new User(user);
     } catch (error) {

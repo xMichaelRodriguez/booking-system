@@ -64,7 +64,8 @@ describe('AuthService', () => {
       username: 'test',
       password: 'hashed',
       activationToken: expect.any(String),
-    });
+      isGoogleAccount: false,
+    } as User);
     const user = await authService.create(createAuthDto);
     expect(user).toEqual(expect.objectContaining(user));
 

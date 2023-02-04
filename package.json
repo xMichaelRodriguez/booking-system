@@ -20,7 +20,11 @@
     "test:cov": "cross-env NODE_ENV=test jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "typeorm":"yarn build && npx typeorm  -d dist/db/data-source.js",
+    "migration:generate":"yarn typeorm -- migration:generate",
+    "migration:run":"yarn typeorm -- migration:run",
+    "migration:revert":"yarn typeorm -- migration:revert"
   },
   "dependencies": {
     "@babel/code-frame": "7.18.6",
