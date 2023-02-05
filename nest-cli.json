@@ -7,9 +7,14 @@
   "compilerOptions": {
     "assets": [
       {
-        "include": "**/templates/*",
+        "include": "./db",
         "watchAssets": true,
         "outDir": "dist"
+      },
+      {
+        "include": "**/templates/*",
+        "watchAssets": true,
+        "outDir": "dist/src/"
       }
     ],
     "watchAssets": true

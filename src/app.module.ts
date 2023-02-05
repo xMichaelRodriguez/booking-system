@@ -1,25 +1,30 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { redisStore } from 'cache-manager-redis-store';
+// import { redisStore } from 'cache-manager-redis-store';
 
 import { AuthModule } from './modules/auth/auth.module';
+import { BookingServicesModule } from './modules/booking-services/booking-services.module';
+import { BookingModule } from './modules/booking/booking.module';
 import { MailModule } from './modules/mail/mail.module';
+import { RoleModule } from './modules/role/role.module';
+import { StatusModule } from './modules/status/status.module';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
-    CacheModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        isGlobal: true,
-        store: redisStore,
-        host: configService.get('REDIS_HOST'),
-        port: +configService.get('REDIS_PORT'),
-      }),
-    }),
+    // CacheModule.registerAsync({
+    //   inject: [ConfigService],
+    //   useFactory: (configService: ConfigService) => ({
+    //     isGlobal: true,
+    //     store: redisStore,
+    //     host: configService.get('REDIS_HOST'),
+    //     port: +configService.get('REDIS_PORT'),
+    //   }),
+    // }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) =>
@@ -43,10 +48,23 @@ import { MailModule } from './modules/mail/mail.module';
               entities: ['./dist/**/*.entity.js'],
             },
     }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: '1h',
+        },
+      }),
+      inject: [ConfigService],
+    }),
     AuthModule,
     MailModule,
+    RoleModule,
+    BookingServicesModule,
+    StatusModule,
+    BookingModule,
   ],
-  controllers: [],
   providers: [],
 })
 export class AppModule {}

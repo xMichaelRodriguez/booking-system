@@ -28,11 +28,13 @@ module.exports = {
     'import-helpers/order-imports': [
       'warn',
       {
-        newlinesBetween: 'always', // new line between groups
-        groups: ['module', ['parent', 'sibling', 'index']],
+        // example configuration
+        newlinesBetween: 'always',
+        groups: ['module', '/^@shared/', ['parent', 'sibling', 'index']],
         alphabetize: { order: 'asc', ignoreCase: true },
       },
     ],
+
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
