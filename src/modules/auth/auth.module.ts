@@ -9,7 +9,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { EncoderService } from './encoder/encoder.service';
 import User from './entities/auth.entity';
-import { JwtStrategy } from './jwtStrategy';
+import { GoogleStrategy } from './strategies/google-strategy';
+import { JwtStrategy } from './strategies/jwtStrategy';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -27,7 +28,7 @@ import { JwtStrategy } from './jwtStrategy';
     RoleModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, EncoderService, JwtStrategy],
+  providers: [AuthService, EncoderService, JwtStrategy, GoogleStrategy],
   exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}

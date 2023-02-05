@@ -18,6 +18,7 @@ import { RoleRepositoryService } from '../role/role-repository.service';
 import { ActivateUserDto } from './dto/activate-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateAuthDto } from './dto/create-auth.dto';
+import { CreateGoogleDto } from './dto/create-google.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -30,7 +31,7 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   constructor(
     @InjectRepository(User)
-    private userReposity: Repository<User>,
+    private userRepository: Repository<User>,
 
     private readonly roleRepository: RoleRepositoryService,
 
@@ -49,15 +50,15 @@ export class AuthService {
       );
 
       const role = await this.roleRepository.getDefaultRole();
-      const user = await this.userReposity.create({
+      const user = await this.userRepository.create({
         ...createAuthDto,
         password: plainTextToHash,
         activationToken: v4(),
         role,
       });
-      const userSaved = await this.userReposity.save(user);
+      const userToSave = await this.userRepository.save(user);
       await this.mailService.sendVerificationUsers(user, user.activationToken);
-      return new User(userSaved);
+      return new User(userToSave);
     } catch (error) {
       if (error.code === '23505')
         throw new ConflictException('This email is already registered');
@@ -89,12 +90,16 @@ export class AuthService {
       isActive,
       role,
     };
-    const accessToken = this.jwtService.sign(payload);
+    try {
+      const accessToken = this.jwtService.sign(payload);
 
-    return {
-      user: new User(user),
-      jwt: { accessToken },
-    };
+      return {
+        user: new User(user),
+        jwt: { accessToken },
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Error trying to sign in');
+    }
   }
 
   async activateUser(activateUserDto: ActivateUserDto): Promise<void> {
@@ -103,21 +108,26 @@ export class AuthService {
     if (!user)
       throw new UnprocessableEntityException('This action can not be done');
 
-    await this.userReposity.update(user.id, {
-      ...user,
-      isActive: true,
-      activationToken: null,
-    });
+    try {
+      await this.userRepository.update(user.id, {
+        ...user,
+        isActive: true,
+        activationToken: null,
+      });
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new InternalServerErrorException('Error trying activation account');
+    }
   }
 
   async findOneInactiveByIdActivationToken(id: number, code: string) {
-    return await this.userReposity.findOne({
+    return await this.userRepository.findOne({
       where: { id, activationToken: code, isActive: false },
     });
   }
 
   async findByEmail(email: string): Promise<User> {
-    const user: User = await this.userReposity.findOne({
+    const user: User = await this.userRepository.findOne({
       where: { email },
       relations: {
         role: true,
@@ -133,13 +143,18 @@ export class AuthService {
     requestResetPassword: RequestResetPasswordDto,
   ): Promise<void> {
     const { email } = requestResetPassword;
-    const user: User = await this.findByEmail(email);
+    try {
+      const user: User = await this.findByEmail(email);
 
-    this.userReposity.update(
-      user.id,
+      this.userRepository.update(
+        user.id,
 
-      { ...user, resetPasswordToken: v4() },
-    );
+        { ...user, resetPasswordToken: v4() },
+      );
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new InternalServerErrorException('Error trying to reset password');
+    }
     // send email(e.g Dispatch an event so MailerModule can send the email  )
   }
 
@@ -151,7 +166,7 @@ export class AuthService {
 
     const newPassword = await this.encoderService.encodePassword(password);
 
-    this.userReposity.update(user.id, {
+    this.userRepository.update(user.id, {
       ...user,
       password: newPassword,
       resetPasswordToken: null,
@@ -159,7 +174,7 @@ export class AuthService {
   }
 
   async findOneByResetPasswordToken(resetPasswordToken: string): Promise<User> {
-    const user: User = await this.userReposity.findOne({
+    const user: User = await this.userRepository.findOne({
       where: { resetPasswordToken },
     });
     if (!user) throw new NotFoundException();
@@ -181,9 +196,80 @@ export class AuthService {
     if (!isValid) throw new BadRequestException('old password does not match');
 
     const hashPassword = await this.encoderService.encodePassword(newPassword);
-    await this.userReposity.update(user.id, {
+    await this.userRepository.update(user.id, {
       ...user,
       password: hashPassword,
     });
+  }
+
+  async prepareUserRegister(req) {
+    if (!req.user) throw new NotFoundException('Not user from google');
+
+    const user = {
+      username: `${req.user.firstName} ${req.user.lastName}`,
+      email: req.user.email,
+    };
+    const userExist: User = await this.userRepository.findOne({
+      where: { email: user.email },
+      relations: { role: true },
+    });
+
+    if (!userExist) return this.registerUserWithGoogle(user);
+
+    return this.loginWithGoogle(userExist);
+  }
+
+  async loginWithGoogle(loginAuthDto: User) {
+    if (!loginAuthDto.isGoogleAccount)
+      throw new ConflictException(
+        'This email is already registered with a local account',
+      );
+
+    const { id, email, isActive, role } = loginAuthDto;
+    const payload: JwtPayload = {
+      id,
+      email,
+      isActive,
+      role,
+    };
+    const accessToken = await this.jwtService.sign(payload);
+
+    return {
+      user: new User(loginAuthDto),
+      jwt: accessToken,
+    };
+  }
+
+  async registerUserWithGoogle(user: CreateGoogleDto) {
+    const role = await this.roleRepository.getDefaultRole();
+    const values = {
+      ...user,
+      isGoogleAccount: true,
+      isActive: true,
+      role,
+    } as User;
+
+    try {
+      const { id, email, isActive, role } = await this.userRepository.save(
+        values,
+      );
+      const payload: JwtPayload = {
+        id,
+        email,
+        isActive,
+        role,
+      };
+
+      const accessToken = await this.jwtService.sign(payload);
+
+      return { user, jwt: accessToken };
+    } catch (error) {
+      if (error.code === '23505')
+        throw new ConflictException('This email is already registered');
+
+      this.logger.debug(error);
+
+      throw new InternalServerErrorException('Error creating user');
+    }
   }
 }
