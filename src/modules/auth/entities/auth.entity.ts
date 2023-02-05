@@ -61,7 +61,7 @@ export default class User {
     example: 'false',
     description: 'column of the user is active account',
   })
-  @Column({ type: 'boolean', name: 'is_google_account' })
+  @Column({ type: 'boolean', name: 'is_google_account', default: false })
   isGoogleAccount: boolean;
 
   @ApiProperty({

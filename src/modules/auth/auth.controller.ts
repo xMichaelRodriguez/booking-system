@@ -130,8 +130,8 @@ export class AuthController {
     type: errorException,
     description: 'NotFoundException',
   })
-  @Patch('/change-password')
-  @UseGuards(AuthGuard())
+  @Patch('/change-passwords')
+  @UseGuards(AuthGuard('jwt'))
   changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
     @GetUser() user: User,

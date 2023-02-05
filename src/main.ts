@@ -29,11 +29,14 @@ async function bootstrap() {
 
   // config documentation
   const config = new DocumentBuilder()
-    .setTitle('User Profile Management System')
-    .setDescription('The User Profile Management System API description')
+    .setTitle('Booking app')
+    .setDescription('The Booking app API description')
     .setVersion('1.0')
     .addTag('Auth')
-    .addTag('Post')
+    .addTag('Role')
+    .addTag('Booking')
+    .addTag('Service')
+    .addTag('States')
     .build();
   const document = SwaggerModule.createDocument(app, config);
 

@@ -14,7 +14,7 @@
       {
         "include": "**/templates/*",
         "watchAssets": true,
-        "outDir": "dist"
+        "outDir": "dist/src/"
       }
     ],
     "watchAssets": true

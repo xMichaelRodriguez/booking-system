@@ -14,6 +14,7 @@ import { Repository } from 'typeorm';
 import { v4 } from 'uuid';
 
 import { MailService } from '../mail/mail.service';
+import { RoleRepositoryService } from '../role/role-repository.service';
 import { ActivateUserDto } from './dto/activate-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -31,6 +32,8 @@ export class AuthService {
     @InjectRepository(User)
     private userReposity: Repository<User>,
 
+    private readonly roleRepository: RoleRepositoryService,
+
     private encoderService: EncoderService,
 
     private jwtService: JwtService,
@@ -44,21 +47,24 @@ export class AuthService {
       const plainTextToHash = await this.encoderService.encodePassword(
         password,
       );
+
+      const role = await this.roleRepository.getDefaultRole();
       const user = await this.userReposity.create({
         ...createAuthDto,
         password: plainTextToHash,
         activationToken: v4(),
+        role,
       });
-      await this.userReposity.save(user);
+      const userSaved = await this.userReposity.save(user);
       await this.mailService.sendVerificationUsers(user, user.activationToken);
-      return new User(user);
+      return new User(userSaved);
     } catch (error) {
       if (error.code === '23505')
         throw new ConflictException('This email is already registered');
 
-      this.logger.error({ error });
+      this.logger.debug(error);
 
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException('Error creating user');
     }
   }
 
@@ -76,11 +82,12 @@ export class AuthService {
     if (!user.isActive)
       throw new UnauthorizedException('Please verify your account');
 
-    const { id, email, isActive } = user;
+    const { id, email, isActive, role } = user;
     const payload: JwtPayload = {
       id,
       email,
       isActive,
+      role,
     };
     const accessToken = this.jwtService.sign(payload);
 
@@ -112,6 +119,9 @@ export class AuthService {
   async findByEmail(email: string): Promise<User> {
     const user: User = await this.userReposity.findOne({
       where: { email },
+      relations: {
+        role: true,
+      },
     });
     if (!user)
       throw new NotFoundException(`user with email: ${email} not found`);

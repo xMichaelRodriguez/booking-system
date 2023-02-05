@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 // import { redisStore } from 'cache-manager-redis-store';
@@ -47,6 +48,16 @@ import { StatusModule } from './modules/status/status.module';
               entities: ['./dist/**/*.entity.js'],
             },
     }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: '1h',
+        },
+      }),
+      inject: [ConfigService],
+    }),
     AuthModule,
     MailModule,
     RoleModule,
@@ -54,7 +65,6 @@ import { StatusModule } from './modules/status/status.module';
     StatusModule,
     BookingModule,
   ],
-  controllers: [],
   providers: [],
 })
 export class AppModule {}
