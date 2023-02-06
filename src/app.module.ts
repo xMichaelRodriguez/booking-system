@@ -44,7 +44,7 @@ import { StatusModule } from './modules/status/status.module';
               password: configService.get<string>('PG_PASSWORD'),
               database: configService.get<string>('PG_DATABASE'),
               autoLoadEntities: true,
-              synchronize: true,
+              synchronize: false,
               entities: ['./dist/**/*.entity.js'],
             },
     }),

@@ -27,19 +27,13 @@ export class BookingServicesController {
     return this.bookingServicesService.create(createBookingServiceDto);
   }
 
-  @UseGuards(
-    AuthGuard(['jwt', 'gogle']),
-    new RoleAuthGuard('ADMIN', 'AUTHENTICATED'),
-  )
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
   @Get()
   findAll() {
     return this.bookingServicesService.findAll();
   }
 
-  @UseGuards(
-    AuthGuard(['jwt', 'gogle']),
-    new RoleAuthGuard('ADMIN', 'AUTHENTICATED'),
-  )
+  @UseGuards(AuthGuard(['jwt']), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.bookingServicesService.findOne(+id);

@@ -9,8 +9,8 @@ export class Services {
   @Column({
     type: 'varchar',
     length: 100,
-    nullable: false,
     unique: true,
+    nullable: false,
   })
   name: string;
 

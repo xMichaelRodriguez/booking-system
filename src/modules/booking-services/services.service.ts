@@ -2,9 +2,11 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Logger } from '@nestjs/common/services';
 import { InjectRepository } from '@nestjs/typeorm';
+import internal from 'stream';
 import { Repository } from 'typeorm';
 
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -19,10 +21,11 @@ export class BookingServicesService {
     private readonly servicesRepository: Repository<Services>,
   ) {}
   async create(createBookingServiceDto: CreateServiceDto) {
-    const service = this.servicesRepository.create(createBookingServiceDto);
-
+    const serviceToSave = this.servicesRepository.create(
+      createBookingServiceDto,
+    );
     try {
-      return await this.servicesRepository.save(service);
+      return await this.servicesRepository.save(serviceToSave);
     } catch (error) {
       if (error.code === '23505')
         throw new ConflictException('This service is already registered');
@@ -33,19 +36,50 @@ export class BookingServicesService {
     }
   }
 
-  findAll() {
-    return `This action returns all bookingServices`;
+  async findAll() {
+    try {
+      return await this.servicesRepository.find();
+    } catch (error) {
+      throw new InternalServerErrorException('Error trying search services');
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} bookingService`;
+  async findOne(id: number) {
+    const service = await this.servicesRepository
+      .createQueryBuilder('services')
+      .where('id=:value', { value: id })
+      .getOne();
+
+    if (!service) throw new NotFoundException('Service not found');
+
+    return service;
   }
 
-  update(id: number, updateBookingServiceDto: UpdateServiceDto) {
-    return `This action updates a #${id} bookingService ${updateBookingServiceDto}`;
+  async update(id: number, updateBookingServiceDto: UpdateServiceDto) {
+    try {
+      await this.servicesRepository
+        .createQueryBuilder()
+        .update(Services)
+        .set(updateBookingServiceDto)
+        .where('id=:id', { id })
+        .execute();
+    } catch (error) {
+      this.#logger.error(error.message);
+      throw new InternalServerErrorException('Error trying update service');
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} bookingService`;
+  async remove(id: number) {
+    try {
+      await this.servicesRepository
+        .createQueryBuilder('services')
+        .delete()
+        .from(Services)
+        .where('id=:id', { id })
+        .execute();
+    } catch (error) {
+      this.#logger.error(error.message);
+      throw new InternalServerErrorException('Error trying remove service');
+    }
   }
 }
