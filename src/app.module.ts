@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 // import { redisStore } from 'cache-manager-redis-store';
 
 import { AuthModule } from './modules/auth/auth.module';
-import { BookingServicesModule } from './modules/booking-services/booking-services.module';
+import { ServicesModule } from './modules/booking-services/services.module';
 import { BookingModule } from './modules/booking/booking.module';
 import { MailModule } from './modules/mail/mail.module';
 import { RoleModule } from './modules/role/role.module';
@@ -61,7 +61,7 @@ import { StatusModule } from './modules/status/status.module';
     AuthModule,
     MailModule,
     RoleModule,
-    BookingServicesModule,
+    ServicesModule,
     StatusModule,
     BookingModule,
   ],

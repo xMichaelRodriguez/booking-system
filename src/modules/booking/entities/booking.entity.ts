@@ -1,5 +1,5 @@
 import User from 'src/modules/auth/entities/auth.entity';
-import { BookingService } from 'src/modules/booking-services/entities/booking-service.entity';
+import { Services } from 'src/modules/booking-services/entities/services.entity';
 import { Status } from 'src/modules/status/entities/status.entity';
 import {
   Entity,
@@ -20,11 +20,11 @@ export class Booking {
   })
   clientId: User;
 
-  @OneToOne(() => BookingService, booKingservice => booKingservice.booking)
+  @OneToOne(() => Services, services => services.booking)
   @JoinColumn({
     name: 'service_id',
   })
-  serviceId: BookingService;
+  serviceId: Services;
 
   @OneToOne(() => Status, status => status.booking)
   @JoinColumn({

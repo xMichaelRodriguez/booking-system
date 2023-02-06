@@ -2,9 +2,17 @@ import { Booking } from 'src/modules/booking/entities/booking.entity';
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('services')
-export class BookingService {
+export class Services {
   @PrimaryGeneratedColumn('increment')
   id: number;
+
+  @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: false,
+    unique: true,
+  })
+  name: string;
 
   @Column({ type: 'varchar', length: 500, nullable: false })
   description: string;
