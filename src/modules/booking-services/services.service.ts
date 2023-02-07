@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Logger } from '@nestjs/common/services';
 import { InjectRepository } from '@nestjs/typeorm';
-import internal from 'stream';
 import { Repository } from 'typeorm';
 
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -47,7 +46,7 @@ export class BookingServicesService {
   async findOne(id: number) {
     const service = await this.servicesRepository
       .createQueryBuilder('services')
-      .where('id=:value', { value: id })
+      .where('id=:id', { id })
       .getOne();
 
     if (!service) throw new NotFoundException('Service not found');
@@ -56,6 +55,7 @@ export class BookingServicesService {
   }
 
   async update(id: number, updateBookingServiceDto: UpdateServiceDto) {
+    await this.findOne(id);
     try {
       await this.servicesRepository
         .createQueryBuilder()
@@ -70,6 +70,7 @@ export class BookingServicesService {
   }
 
   async remove(id: number) {
+    await this.findOne(id);
     try {
       await this.servicesRepository
         .createQueryBuilder('services')

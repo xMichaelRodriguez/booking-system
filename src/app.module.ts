@@ -33,7 +33,7 @@ import { StatusModule } from './modules/status/status.module';
               type: 'postgres',
               url: process.env.DATABASE_URL,
               autoLoadEntities: true,
-              synchronize: true,
+              synchronize: false,
               entities: ['./dist/**/*.entity.js'],
             }
           : {
@@ -44,7 +44,7 @@ import { StatusModule } from './modules/status/status.module';
               password: configService.get<string>('PG_PASSWORD'),
               database: configService.get<string>('PG_DATABASE'),
               autoLoadEntities: true,
-              synchronize: false,
+              synchronize: true,
               entities: ['./dist/**/*.entity.js'],
             },
     }),

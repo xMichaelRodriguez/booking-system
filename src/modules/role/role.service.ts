@@ -1,5 +1,6 @@
 import {
   Injectable,
+  NotFoundException,
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
@@ -16,18 +17,23 @@ export class RoleService {
     private readonly roleRepository: Repository<Role>,
   ) {}
   async getAll(): Promise<Role[]> {
-    return await this.roleRepository.find();
-  }
-
-  async getOne(id: number): Promise<Role[]> {
     try {
-      return await this.roleRepository
-        .createQueryBuilder('roles')
-        .where('roles.id = :value', { value: id })
-        .getMany();
+      return await this.roleRepository.find();
     } catch (error) {
       this.#logger.error(error.message);
-      throw new InternalServerErrorException('Error Finding roles');
+      throw new InternalServerErrorException('Error trying find roles');
     }
+  }
+
+  async getOne(id: number): Promise<Role> {
+    const role = await this.roleRepository
+
+      .createQueryBuilder('roles')
+      .where('roles.id = :id', { id })
+      .getOne();
+
+    if (!role) throw new NotFoundException('Role Not Found');
+
+    return role;
   }
 }

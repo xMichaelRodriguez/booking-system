@@ -33,9 +33,9 @@ async function bootstrap() {
     .setDescription('The Booking app API description')
     .setVersion('1.0')
     .addTag('Auth')
-    .addTag('Role')
-    .addTag('Booking')
-    .addTag('Service')
+    .addTag('Roles')
+    .addTag('Bookings')
+    .addTag('Services')
     .addTag('States')
     .addBearerAuth(
       {
