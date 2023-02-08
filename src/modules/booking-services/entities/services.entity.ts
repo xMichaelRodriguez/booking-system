@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Booking } from 'src/modules/booking/entities/booking.entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('services')
 export class Services {
@@ -39,6 +39,6 @@ export class Services {
   })
   price: number;
 
-  @OneToOne(() => Booking, booking => booking.serviceId)
+  @ManyToMany(() => Booking, booking => booking.serviceId)
   booking: number;
 }

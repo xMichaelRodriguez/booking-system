@@ -3,8 +3,11 @@ import User from 'src/modules/auth/entities/auth.entity';
 import { Services } from 'src/modules/booking-services/entities/services.entity';
 import { Status } from 'src/modules/status/entities/status.entity';
 import {
+  Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -30,8 +33,8 @@ export class Booking {
   @ApiProperty({
     example: '1',
   })
-  @OneToOne(() => Services, services => services.booking)
-  @JoinColumn({
+  @ManyToMany(() => Services, services => services.booking)
+  @JoinTable({
     name: 'service_id',
   })
   serviceId: Services;
@@ -44,4 +47,26 @@ export class Booking {
     name: 'status_id',
   })
   statusId: Status;
+
+  @ApiProperty({
+    example: '01/14/2023',
+  })
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    name: 'date',
+    length: 10,
+  })
+  date: string;
+
+  @ApiProperty({
+    example: '12:00 AM',
+  })
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    name: 'hour',
+    length: 8,
+  })
+  hour: string;
 }
