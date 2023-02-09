@@ -1,6 +1,7 @@
 app 
 dist
 public
+db
 
 
 .env.*

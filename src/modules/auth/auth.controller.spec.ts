@@ -3,9 +3,11 @@
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard, PassportModule } from '@nestjs/passport';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
+import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 
 import { MailService } from '../mail/mail.service';
+import { Role } from '../role/entities/role.entity';
+import { RoleModule } from '../role/role.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -23,13 +25,21 @@ describe('AuthController', () => {
   let service: AuthService;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PassportModule.register({ defaultStrategy: 'jwt' })],
+      imports: [
+        PassportModule.register({ defaultStrategy: 'jwt' }),
+        RoleModule,
+        TypeOrmModule.forFeature([Role]),
+      ],
       controllers: [AuthController],
       providers: [
         AuthService,
         {
           provide: getRepositoryToken(User),
           useValue: User,
+        },
+        {
+          provide: getRepositoryToken(Role),
+          useValue: Role,
         },
         EncoderService,
         JwtService,
@@ -53,11 +63,12 @@ describe('AuthController', () => {
 
   it('should return a token and user data on successful login', async () => {
     const loginAuthDto = { email: 'test@example.com', password: 'test' };
-    const user: IUser = {
+    const user = {
       id: 1,
       username: 'test',
       email: 'test@example.com',
-    };
+      isGoogleAccount: false,
+    } as User;
 
     const accessToken = 'test-token';
     jest.spyOn(service, 'login').mockImplementation(

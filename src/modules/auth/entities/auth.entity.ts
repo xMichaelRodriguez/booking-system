@@ -1,9 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsUUID } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Booking } from 'src/modules/booking/entities/booking.entity';
+import { Role } from 'src/modules/role/entities/role.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
-@Entity()
+@Entity({ name: 'users' })
 export default class User {
   @ApiProperty({
     example: '1',
@@ -49,6 +58,13 @@ export default class User {
   isActive?: boolean;
 
   @ApiProperty({
+    example: 'false',
+    description: 'column of the user is active account',
+  })
+  @Column({ type: 'boolean', name: 'is_google_account', default: false })
+  isGoogleAccount: boolean;
+
+  @ApiProperty({
     example: 'example-token',
     description: ' this is a example but this use uuid v4',
   })
@@ -75,6 +91,15 @@ export default class User {
     nullable: true,
   })
   resetPasswordToken?: string;
+
+  @ManyToOne(() => Role, role => role.users)
+  @JoinColumn({
+    name: 'role_id',
+  })
+  role: Role;
+
+  @OneToMany(() => Booking, booking => booking.clientId, { lazy: true })
+  booking: Promise<Booking[]>;
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
