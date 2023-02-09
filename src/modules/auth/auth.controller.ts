@@ -88,18 +88,7 @@ export class AuthController {
   @ApiOkResponse({
     schema: {
       example: {
-        user: {
-          id: 1,
-          username: 'John Doe',
-          email: 'johndoe@doe.com',
-          isActive: true,
-          isGoogleAccount: false,
-          role: {
-            id: 22,
-            name: 'example',
-            description: 'the example role can realize all operations ',
-          },
-        },
+        type: User,
         jwt: {
           accessToken: 'examplePlainToken',
         },
