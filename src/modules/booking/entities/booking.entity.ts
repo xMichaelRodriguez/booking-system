@@ -9,7 +9,6 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -22,7 +21,10 @@ export class Booking {
   id: number;
 
   @ApiProperty({
-    example: '1',
+    example: {
+      id: '1',
+      username: 'hola',
+    },
   })
   @ManyToOne(() => User, user => user.booking)
   @JoinColumn({
@@ -31,18 +33,18 @@ export class Booking {
   clientId: User;
 
   @ApiProperty({
-    example: '1',
+    example: Services,
   })
-  @ManyToMany(() => Services, services => services.booking)
-  @JoinTable({
+  @ManyToOne(() => Services, services => services.booking)
+  @JoinColumn({
     name: 'service_id',
   })
   serviceId: Services;
 
   @ApiProperty({
-    example: '1',
+    example: Status,
   })
-  @OneToOne(() => Status, status => status.booking)
+  @ManyToOne(() => Status, status => status.booking)
   @JoinColumn({
     name: 'status_id',
   })

@@ -15,6 +15,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConflictResponse,
+  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -58,7 +59,7 @@ export class AuthController {
     },
     description: 'Internal Server Error',
   })
-  @ApiOkResponse({
+  @ApiCreatedResponse({
     schema: {
       example: {
         user: {

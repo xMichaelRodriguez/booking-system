@@ -54,16 +54,34 @@ export class BookingService {
       serviceId: service,
       statusId: status,
     });
+    const isValidBooking = await this.checkReservationValid(
+      bookingToSave.hour,
+      bookingToSave.date,
+    );
+    if (isValidBooking)
+      throw new ConflictException(
+        'A reservation already exists for the time you are trying to book',
+      );
 
     try {
       return await this.bookingRepository.save(bookingToSave);
     } catch (error) {
+      this.#logger.debug({ error });
       this.#logger.error(error.message);
 
-      throw new InternalServerErrorException('Error creating booking');
+      throw new InternalServerErrorException('Error trying create booking');
     }
   }
 
+  async checkReservationValid(hour: string, date: string) {
+    try {
+      const bookings = await this.bookingRepository.findBy({ date });
+      return bookings.some(booking => booking.hour === hour);
+    } catch (error) {
+      this.#logger.error(error.message);
+      throw new InternalServerErrorException('Error trying create booking');
+    }
+  }
   async findServiceClientStatus(
     serviceId: number,
     clientId: number,
@@ -128,15 +146,122 @@ export class BookingService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} booking `;
+  async findOne(id: number, params: IFilterParams = {} as IFilterParams) {
+    const {
+      clientId = null,
+      clientName = null,
+      serviceId = null,
+      serviceName = null,
+      statusId = null,
+      statusName = null,
+    } = params;
+
+    try {
+      return await this.bookingRepository.findOne({
+        relations: {
+          clientId: true,
+          serviceId: true,
+          statusId: true,
+        },
+        where: {
+          clientId: {
+            id: clientId,
+            username: clientName,
+          },
+          serviceId: {
+            id: serviceId,
+            name: serviceName,
+          },
+          statusId: {
+            id: statusId,
+            name: statusName,
+          },
+        },
+      });
+    } catch (error) {
+      this.#logger.error(error.message);
+      throw new InternalServerErrorException('Error trying find booking');
+    }
   }
 
-  update(id: number, updateBookingDto: UpdateBookingDto) {
-    return `This action updates a #${id} booking ${updateBookingDto}`;
+  async update(
+    id: number,
+    updateBookingDto: UpdateBookingDto,
+    processedTime: string,
+    processedDate: string,
+  ) {
+    const booking = {
+      ...updateBookingDto,
+      date: processedDate,
+      hour: processedTime,
+    };
+
+    const { client, service, status } = await this.findServiceClientStatus(
+      booking.serviceId,
+      booking.clientId,
+      booking.stateId,
+    );
+
+    const bookingToSave = this.bookingRepository.create({
+      ...booking,
+      clientId: new User(client),
+      serviceId: service,
+      statusId: status,
+    });
+    const isValidBooking = await this.checkReservationValid(
+      bookingToSave.hour,
+      bookingToSave.date,
+    );
+    if (isValidBooking)
+      throw new ConflictException(
+        'A reservation already exists for the time you are trying to book',
+      );
+
+    try {
+      await this.bookingRepository
+        .createQueryBuilder()
+        .update(Booking)
+        .set(bookingToSave)
+        .where('id= :id', { id })
+        .execute();
+    } catch (error) {
+      this.#logger.error(error.message);
+
+      throw new InternalServerErrorException('Error trying create booking');
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} booking `;
+  processedDateAndHour(bookingDto: CreateBookingDto | UpdateBookingDto) {
+    const { hour, date } = bookingDto;
+
+    const newHour = new Date(hour);
+    const newDate = new Date(date);
+    const processedTime = new Intl.DateTimeFormat('en-us', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(newHour);
+
+    const processedDate = new Intl.DateTimeFormat('en-us', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(newDate);
+
+    return {
+      processedDate,
+      processedTime,
+    };
+  }
+  async remove(id: number) {
+    try {
+      await this.bookingRepository
+        .createQueryBuilder('Booking')
+        .delete()
+        .from(Booking)
+        .where('id =:id', { id })
+        .execute();
+    } catch (error) {
+      throw new InternalServerErrorException('Error trying Delete Booking');
+    }
   }
 }

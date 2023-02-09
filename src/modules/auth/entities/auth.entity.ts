@@ -98,8 +98,8 @@ export default class User {
   })
   role: Role;
 
-  @OneToMany(() => Booking, booking => booking.clientId)
-  booking: Booking;
+  @OneToMany(() => Booking, booking => booking.clientId, { lazy: true })
+  booking: Promise<Booking[]>;
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
