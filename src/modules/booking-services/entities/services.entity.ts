@@ -1,12 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Booking } from 'src/modules/booking/entities/booking.entity';
-import {
-  Column,
-  Entity,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('services')
 export class Services {

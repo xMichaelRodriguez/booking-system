@@ -63,7 +63,7 @@ export class AuthService {
       if (error.code === '23505')
         throw new ConflictException('This email is already registered');
 
-      this.logger.debug(error);
+      this.logger.error({ error });
 
       throw new InternalServerErrorException('Error creating user');
     }

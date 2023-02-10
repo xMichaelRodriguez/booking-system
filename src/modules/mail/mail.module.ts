@@ -15,16 +15,16 @@ import { MailService } from './mail.service';
         // transport: config.get("MAIL_TRANSPORT"),
         // or
         transport: {
-          host: config.get('MAIL_HOST'),
+          host: config.get('SG_MAIL_HOST'),
           secure: false,
-          port: config.get('MAIL_PORT'),
+          port: config.get('SG_MAIL_PORT'),
           auth: {
-            user: config.get('MAIL_USER'),
-            pass: config.get('MAIL_PASSWORD'),
+            user: config.get('SG_MAIL_USER'),
+            pass: config.get('SG_MAIL_PASSWORD'),
           },
         },
         defaults: {
-          from: `"No Reply" <${config.get('MAIL_FROM')}>`,
+          from: `"No Reply" <${config.get('SG_MAIL_FROM')}>`,
         },
         template: {
           dir: join(__dirname, 'templates/'),

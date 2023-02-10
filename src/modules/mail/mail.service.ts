@@ -1,23 +1,41 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common/exceptions';
+import { Logger } from '@nestjs/common/services';
+import { ConfigurationService } from 'src/config/configuration';
 
 import User from '../auth/entities/auth.entity';
 
 @Injectable()
 export class MailService {
+  #logger = new Logger(MailService.name);
   constructor(private mailerService: MailerService) {}
 
   async sendVerificationUsers(user: User, token: string) {
-    const url = `http://localhost:4000/api/v1/auth/activate-accounts/?id=${user.id}&code=${token}`;
+    const configService = new ConfigurationService();
+    const url = `${configService.getApiUrl()}/api/v1/auth/activate-accounts/?id=${
+      user.id
+    }&code=${token}`;
+
     const sendMailOptions = {
+      from: configService.getSender(),
       to: user.email,
-      subject: 'Welcome to Mikey.dev; Confirm Your Account!',
+      subject: 'Welcome to Mi application; Confirm Your Account!',
       template: './transactional',
       context: {
         name: user.username,
         url,
       },
     };
-    await this.mailerService.sendMail(sendMailOptions);
+
+    try {
+      this.#logger.debug('MAIL SEND');
+      await this.mailerService.sendMail(sendMailOptions);
+    } catch (error) {
+      this.#logger.error(error.message);
+      throw new InternalServerErrorException(
+        'error trying sent mail verification',
+      );
+    }
   }
 }

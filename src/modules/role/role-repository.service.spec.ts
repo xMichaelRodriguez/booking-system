@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
 import { RoleRepositoryService } from './role-repository.service';
 
 describe('RoleRepositoryService', () => {
