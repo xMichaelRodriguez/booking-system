@@ -11,7 +11,7 @@ async function bootstrap() {
 
   // middlewares
   app.enableCors({
-    origin: '*',
+    origin: ['*', 'http://localhost:8081'],
   });
   app.useGlobalPipes(new ValidationPipe());
   app.use(compression());

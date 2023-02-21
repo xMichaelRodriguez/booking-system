@@ -272,4 +272,8 @@ export class AuthService {
       throw new InternalServerErrorException('Error creating user');
     }
   }
+
+  async getProfile(user: User) {
+    return new User(user);
+  }
 }

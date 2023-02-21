@@ -1,4 +1,12 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  Param,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -13,8 +21,9 @@ import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
 import { Role } from './entities/role.entity';
 import { RoleService } from './role.service';
 
-@ApiBearerAuth()
+@ApiBearerAuth('access-token')
 @ApiTags('Roles')
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
@@ -41,7 +50,7 @@ export class RoleController {
       },
     },
   })
-  @UseGuards(new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
   @Get()
   async find(): Promise<Role[]> {
     return this.roleService.getAll();
@@ -77,7 +86,7 @@ export class RoleController {
       },
     },
   })
-  @UseGuards(new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Role> {
     return this.roleService.getOne(+id);
