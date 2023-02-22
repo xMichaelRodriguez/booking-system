@@ -240,6 +240,10 @@ export class AuthService {
     };
   }
 
+  async instagramCronJob(req: any) {
+    console.log(req);
+    return 'hola';
+  }
   async registerUserWithGoogle(user: CreateGoogleDto) {
     const role = await this.roleRepository.getDefaultRole();
     const values = {

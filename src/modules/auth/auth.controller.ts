@@ -156,6 +156,12 @@ export class AuthController {
   async googleSignIn(@Req() req) {
     return await this.authService.prepareUserRegister(req);
   }
+
+  @Get('/instagram/callback')
+  async instagramAuthorization(@Req() req) {
+    return await this.authService.instagramCronJob(req);
+  }
+
   @ApiOkResponse()
   @ApiInternalServerErrorResponse({
     schema: {
