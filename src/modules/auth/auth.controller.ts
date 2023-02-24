@@ -22,6 +22,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
 
 import { AuthService } from './auth.service';
 import { GetUser } from './decorators/get-user.decorator';
@@ -62,18 +63,7 @@ export class AuthController {
   @ApiCreatedResponse({
     schema: {
       example: {
-        user: {
-          id: 1,
-          username: 'John Doe',
-          email: 'johndoe@doe.com',
-          isActive: true,
-          isGoogleAccount: false,
-          role: {
-            id: 22,
-            name: 'example',
-            description: 'the example role can realize all operations ',
-          },
-        },
+        user: { type: User },
         jwt: {
           accessToken: 'examplePlainToken',
         },
@@ -88,18 +78,7 @@ export class AuthController {
   @ApiOkResponse({
     schema: {
       example: {
-        user: {
-          id: 1,
-          username: 'John Doe',
-          email: 'johndoe@doe.com',
-          isActive: true,
-          isGoogleAccount: false,
-          role: {
-            id: 22,
-            name: 'example',
-            description: 'the example role can realize all operations ',
-          },
-        },
+        type: User,
         jwt: {
           accessToken: 'examplePlainToken',
         },
@@ -144,18 +123,7 @@ export class AuthController {
   @ApiOkResponse({
     schema: {
       example: {
-        user: {
-          id: 1,
-          username: 'John Doe',
-          email: 'johndoe@doe.com',
-          isActive: true,
-          isGoogleAccount: false,
-          role: {
-            id: 22,
-            name: 'example',
-            description: 'the example role can realize all operations ',
-          },
-        },
+        user: User,
         jwt: {
           accessToken: 'examplePlainToken',
         },
@@ -295,11 +263,32 @@ export class AuthController {
     return this.authService.changePassword(changePasswordDto, user);
   }
 
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({
     description: 'The account has been successfully activated',
   })
   @Get('/activate-accounts')
   async activateAccount(@Query() activateUserDto: ActivateUserDto) {
     return await this.authService.activateUser(activateUserDto);
+  }
+
+  @ApiOkResponse({
+    type: User,
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        error: 'UnauthorizedResponse',
+      },
+    },
+    description: 'Unauthorized error',
+  })
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
+  @Get('/me')
+  async getProfile(@GetUser() user: User) {
+    return await this.authService.getProfile(user);
   }
 }

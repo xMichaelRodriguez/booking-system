@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import {
   ConflictException,
   Injectable,
@@ -6,6 +7,9 @@ import {
 } from '@nestjs/common';
 import { Logger } from '@nestjs/common/services';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AxiosError } from 'axios';
+import { catchError, firstValueFrom } from 'rxjs';
+import { ConfigurationService } from 'src/config/configuration';
 import { Repository } from 'typeorm';
 
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -18,6 +22,8 @@ export class BookingServicesService {
   constructor(
     @InjectRepository(Services)
     private readonly servicesRepository: Repository<Services>,
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigurationService,
   ) {}
   async create(createBookingServiceDto: CreateServiceDto) {
     const serviceToSave = this.servicesRepository.create(
@@ -37,21 +43,40 @@ export class BookingServicesService {
 
   async findAll() {
     try {
-      return await this.servicesRepository.find();
+      const baseUrl = this.configService.getbaseUrl();
+      const token = this.configService.getAccessToken();
+
+      const url = `${baseUrl}/me/media?fields=id,caption,media_url,thumbnail_url&access_token=${token}`;
+      const { data } = await firstValueFrom(
+        this.httpService.get(url).pipe(
+          catchError((error: AxiosError) => {
+            this.#logger.error(error.response.data);
+            throw 'An error happened!';
+          }),
+        ),
+      );
+      return data;
     } catch (error) {
       throw new InternalServerErrorException('Error trying search services');
     }
   }
 
   async findOne(id: number) {
-    const service = await this.servicesRepository
-      .createQueryBuilder('services')
-      .where('id=:id', { id })
-      .getOne();
+    try {
+      const baseUrl = this.configService.getbaseUrl();
+      const token = this.configService.getAccessToken();
 
-    if (!service) throw new NotFoundException('Service not found');
-
-    return service;
+      const url = `${baseUrl}/${id}?fields=id,caption,media_url,thumbnail_url&access_token=${token}`;
+      const { data } = await firstValueFrom(
+        this.httpService.get(url).pipe(
+          catchError((error: AxiosError) => {
+            this.#logger.error(error.response.data);
+            throw 'An error happened!';
+          }),
+        ),
+      );
+      return data;
+    } catch (error) {}
   }
 
   async update(id: number, updateBookingServiceDto: UpdateServiceDto) {
