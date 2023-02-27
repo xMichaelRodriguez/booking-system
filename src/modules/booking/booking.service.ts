@@ -45,7 +45,6 @@ export class BookingService {
     const { client, service, status } = await this.findServiceClientStatus(
       booking.serviceId,
       booking.clientId,
-      booking.stateId,
     );
 
     const bookingToSave = this.bookingRepository.create({
@@ -85,7 +84,7 @@ export class BookingService {
   async findServiceClientStatus(
     serviceId: number,
     clientId: number,
-    stateId: number,
+    stateId?: number,
   ): Promise<{ service: Services; client: User; status: Status }> {
     const service = await this.servicesRepository.findOne({
       where: { id: serviceId },
@@ -99,9 +98,15 @@ export class BookingService {
 
     if (!client) throw new NotFoundException('Client not found');
 
-    const status = await this.statusRepository.findOne({
-      where: { id: stateId },
-    });
+    let status = null;
+    if (stateId)
+      status = await this.statusRepository.findOne({
+        where: { id: stateId },
+      });
+    else
+      status = await this.statusRepository.findOne({
+        where: { name: 'Finalizado' },
+      });
 
     if (!status) throw new NotFoundException('Status not found');
 
@@ -232,20 +237,18 @@ export class BookingService {
   }
 
   processedDateAndHour(bookingDto: CreateBookingDto | UpdateBookingDto) {
-    const { hour, date } = bookingDto;
+    const { date } = bookingDto;
 
-    const newHour = new Date(hour);
-    const newDate = new Date(date);
     const processedTime = new Intl.DateTimeFormat('en-us', {
       hour: '2-digit',
       minute: '2-digit',
-    }).format(newHour);
+    }).format(date);
 
     const processedDate = new Intl.DateTimeFormat('en-us', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-    }).format(newDate);
+    }).format(date);
 
     return {
       processedDate,

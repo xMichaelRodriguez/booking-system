@@ -6,8 +6,6 @@ import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -21,10 +19,7 @@ export class Booking {
   id: number;
 
   @ApiProperty({
-    example: {
-      id: '1',
-      username: 'hola',
-    },
+    type: () => User,
   })
   @ManyToOne(() => User, user => user.booking)
   @JoinColumn({
@@ -33,7 +28,7 @@ export class Booking {
   clientId: User;
 
   @ApiProperty({
-    example: Services,
+    type: () => Services,
   })
   @ManyToOne(() => Services, services => services.booking)
   @JoinColumn({
@@ -42,7 +37,7 @@ export class Booking {
   serviceId: Services;
 
   @ApiProperty({
-    example: Status,
+    type: () => Status,
   })
   @ManyToOne(() => Status, status => status.booking)
   @JoinColumn({

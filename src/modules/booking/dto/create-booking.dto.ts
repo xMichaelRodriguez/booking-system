@@ -23,21 +23,9 @@ export class CreateBookingDto {
   @ApiProperty({
     example: 1,
   })
-  @IsNotEmpty({
-    message: 'required state',
-  })
-  @IsNumber()
-  stateId: number;
-
   @ApiProperty({
     example: '2022-05-12T12:00:00',
   })
   @IsISO8601()
   date: Date;
-
-  @ApiProperty({
-    example: '2022-05-12T12:00:00',
-  })
-  @IsISO8601()
-  hour: Date;
 }

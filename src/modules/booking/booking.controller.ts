@@ -27,6 +27,7 @@ import { IFilterParams } from 'src/interfaces/filter.interface';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
+import { Booking } from './entities/booking.entity';
 
 @ApiTags('Bookings')
 @ApiBearerAuth()
@@ -38,35 +39,7 @@ export class BookingController {
 
   @ApiCreatedResponse({
     description: 'Booking Created',
-    schema: {
-      example: {
-        id: 1,
-        client: {
-          id: 1,
-          username: 'John Doe',
-          email: 'johndoe@doe.com',
-          isActive: true,
-          isGoogleAccount: false,
-          role: {
-            id: 22,
-            name: 'example',
-            description: 'the example role can realize all operations ',
-          },
-        },
-        serviceId: {
-          id: 1,
-          name: 'example service',
-          description: 'example service description',
-          price: 20.2,
-        },
-        stateId: {
-          id: 1,
-          name: 'success',
-        },
-        date: '/01/013/2023',
-        hour: '10:00 AM',
-      },
-    },
+    type: Booking,
   })
   @ApiConflictResponse({
     schema: {
@@ -103,36 +76,7 @@ export class BookingController {
   @ApiOkResponse({
     description: 'List bookings',
     isArray: true,
-
-    schema: {
-      example: {
-        id: 1,
-        client: {
-          id: 1,
-          username: 'John Doe',
-          email: 'johndoe@doe.com',
-          isActive: true,
-          isGoogleAccount: false,
-          role: {
-            id: 22,
-            name: 'example',
-            description: 'the example role can realize all operations ',
-          },
-        },
-        serviceId: {
-          id: 1,
-          name: 'example service',
-          description: 'example service description',
-          price: 20.2,
-        },
-        stateId: {
-          id: 1,
-          name: 'success',
-        },
-        date: '/01/013/2023',
-        hour: '10:00 AM',
-      },
-    },
+    type: Booking,
   })
   @ApiInternalServerErrorResponse({
     schema: {
@@ -152,35 +96,7 @@ export class BookingController {
   @ApiOkResponse({
     description: 'List bookings',
 
-    schema: {
-      example: {
-        id: 1,
-        client: {
-          id: 1,
-          username: 'John Doe',
-          email: 'johndoe@doe.com',
-          isActive: true,
-          isGoogleAccount: false,
-          role: {
-            id: 22,
-            name: 'example',
-            description: 'the example role can realize all operations ',
-          },
-        },
-        serviceId: {
-          id: 1,
-          name: 'example service',
-          description: 'example service description',
-          price: 20.2,
-        },
-        stateId: {
-          id: 1,
-          name: 'success',
-        },
-        date: '/01/013/2023',
-        hour: '10:00 AM',
-      },
-    },
+    type: Booking,
   })
   @ApiInternalServerErrorResponse({
     schema: {
