@@ -1,9 +1,9 @@
 export interface IServiceIg {
   data: IService[];
-  paging: Paging;
+  paging: IServicePaging;
 }
 
-interface Paging {
+export interface IServicePaging {
   cursors: ICursors;
   next: string;
   prev: string;

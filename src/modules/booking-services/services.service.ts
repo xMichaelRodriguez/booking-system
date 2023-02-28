@@ -19,6 +19,7 @@ import {
   IService,
   IServiceIg,
   IServiceParsed,
+  IServicePaging,
 } from './interface/service.interface';
 
 @Injectable()
@@ -157,7 +158,7 @@ export class BookingServicesService {
         }),
       ),
     );
-
-    return data;
+    const dataFilterd = data.data.filter(service => !service.thumbnail_url);
+    return { data: dataFilterd, paging: data.paging as IServicePaging };
   }
 }

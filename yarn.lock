@@ -5963,13 +5963,6 @@ neo-async@^2.6.0, neo-async@^2.6.2:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
-nestjs-paginate@^4.11.0:
-  version "4.11.0"
-  resolved "https://registry.yarnpkg.com/nestjs-paginate/-/nestjs-paginate-4.11.0.tgz#40de1a455a6e1ee7fa0dc9e56adfa39d3a2a70d8"
-  integrity sha512-Pn2KzkB2v9BkgYza2EW/M5cTcTvXO5KoHyrBmj1aKHSMA+lJB7fDnuWd10lWAS/cuMfxVuKJn9I05VvprYm+4w==
-  dependencies:
-    lodash "^4.17.21"
-
 netmask@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/netmask/-/netmask-2.0.2.tgz#8b01a07644065d536383835823bc52004ebac5e7"
