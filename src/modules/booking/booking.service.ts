@@ -117,8 +117,6 @@ export class BookingService {
     const {
       clientId = null,
       clientName = null,
-      serviceId = null,
-      serviceName = null,
       statusId = null,
       statusName = null,
     } = params;
@@ -134,10 +132,6 @@ export class BookingService {
           clientId: {
             id: clientId,
             username: clientName,
-          },
-          serviceId: {
-            id: serviceId,
-            name: serviceName,
           },
           statusId: {
             id: statusId,
@@ -155,8 +149,7 @@ export class BookingService {
     const {
       clientId = null,
       clientName = null,
-      serviceId = null,
-      serviceName = null,
+
       statusId = null,
       statusName = null,
     } = params;
@@ -173,10 +166,7 @@ export class BookingService {
             id: clientId,
             username: clientName,
           },
-          serviceId: {
-            id: serviceId,
-            name: serviceName,
-          },
+
           statusId: {
             id: statusId,
             name: statusName,

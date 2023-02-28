@@ -1,12 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Booking } from 'src/modules/booking/entities/booking.entity';
-import {
-  Column,
-  Entity,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('services')
 export class Services {
@@ -17,34 +11,30 @@ export class Services {
   id: number;
 
   @ApiProperty({
-    example: 'example service',
+    example: '1234455665',
+  })
+  @Column({ name: 'ig_post_id', type: 'varchar', nullable: false })
+  igPostId: number;
+
+  @ApiProperty({
+    example: 'https://example.com',
   })
   @Column({
     type: 'varchar',
-    length: 100,
-    unique: true,
     nullable: false,
+    name: 'media_url',
   })
-  name: string;
+  mediaUrl: string;
 
   @ApiProperty({
     example: 'example service description',
   })
-  @Column({ type: 'varchar', length: 500, nullable: false })
-  description: string;
+  @Column({ type: 'varchar', name: 'caption', nullable: true })
+  caption: string;
 
   @ApiProperty({
-    example: '20.20',
+    example: 'https://example.com',
   })
-  @Column({
-    type: 'decimal',
-    nullable: false,
-    precision: 10,
-    scale: 2,
-    default: 0,
-  })
-  price: number;
-
   @OneToMany(() => Booking, booking => booking.serviceId)
   booking: number;
 }
