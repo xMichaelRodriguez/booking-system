@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
@@ -9,8 +9,10 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { ConfigurationService } from 'src/config/configuration';
 import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
 
+import { PaginationQueryDto } from '../../interfaces/pagination-query.dto';
 import { Services } from './entities/services.entity';
 import { BookingServicesService } from './services.service';
 
@@ -20,6 +22,7 @@ import { BookingServicesService } from './services.service';
 export class BookingServicesController {
   constructor(
     private readonly bookingServicesService: BookingServicesService,
+    private readonly configService: ConfigurationService,
   ) {}
 
   @ApiOkResponse({
@@ -55,8 +58,18 @@ export class BookingServicesController {
   })
   @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
   @Get()
-  findAll() {
-    return this.bookingServicesService.findAll();
+  async findAll(@Query() pagination: PaginationQueryDto) {
+    const { page, limit, order } = pagination;
+    const apiBaseUrl = this.configService.getapiBaseUrl();
+
+    const paginatedServices = await this.bookingServicesService.paginate(
+      page,
+      limit,
+      order,
+      apiBaseUrl,
+    );
+
+    return paginatedServices;
   }
 
   @ApiOkResponse({

@@ -10,4 +10,8 @@ export class ConfigurationService {
   getAccessToken() {
     return process.env.INSTAGRAM_ACCESS_TOKEN;
   }
+
+  getapiBaseUrl() {
+    return process.env.API_BASE_URL;
+  }
 }
