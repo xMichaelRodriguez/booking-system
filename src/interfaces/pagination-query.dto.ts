@@ -40,6 +40,9 @@ export class PaginationQueryDto {
   @IsOptional()
   readonly page?: number = 1;
 
+  @ApiPropertyOptional({
+    default: 'ASC',
+  })
   @IsString()
   @IsOptional()
   readonly order?: OrderType = OrderType.ASC;

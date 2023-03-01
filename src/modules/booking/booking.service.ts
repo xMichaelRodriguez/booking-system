@@ -105,7 +105,7 @@ export class BookingService {
       });
     else
       status = await this.statusRepository.findOne({
-        where: { name: 'Finalizado' },
+        where: { name: 'Reservado' },
       });
 
     if (!status) throw new NotFoundException('Status not found');
@@ -228,17 +228,17 @@ export class BookingService {
 
   processedDateAndHour(bookingDto: CreateBookingDto | UpdateBookingDto) {
     const { date } = bookingDto;
-
+    const dateObject = new Date(date);
     const processedTime = new Intl.DateTimeFormat('en-us', {
       hour: '2-digit',
       minute: '2-digit',
-    }).format(date);
+    }).format(dateObject);
 
     const processedDate = new Intl.DateTimeFormat('en-us', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-    }).format(date);
+    }).format(dateObject);
 
     return {
       processedDate,

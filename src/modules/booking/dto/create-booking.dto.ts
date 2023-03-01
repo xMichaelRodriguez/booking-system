@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsISO8601, IsNotEmpty, IsNumber } from 'class-validator';
-
 export class CreateBookingDto {
   @ApiProperty({
     example: 1,
@@ -27,5 +26,5 @@ export class CreateBookingDto {
     example: '2022-05-12T12:00:00',
   })
   @IsISO8601()
-  date: Date;
+  date: string;
 }
