@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 
 import User from '../auth/entities/auth.entity';
 import { Services } from '../booking-services/entities/services.entity';
+import { Role } from '../role/entities/role.entity';
 import { Status } from '../status/entities/status.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
@@ -113,32 +114,19 @@ export class BookingService {
     return { service, client, status };
   }
 
-  async findAll(params: IFilterParams = {} as IFilterParams) {
-    const {
-      clientId = null,
-      clientName = null,
-      statusId = null,
-      statusName = null,
-    } = params;
-
+  async findAll(user: User) {
     try {
-      return await this.bookingRepository.find({
-        relations: {
-          clientId: true,
-          serviceId: true,
-          statusId: true,
-        },
-        where: {
-          clientId: {
-            id: clientId,
-            username: clientName,
-          },
-          statusId: {
-            id: statusId,
-            name: statusName,
-          },
-        },
-      });
+      const queryBuilder = this.bookingRepository.createQueryBuilder();
+
+      return await queryBuilder
+        .select('booking.*, users.username as users, roles.id as role')
+        .from(Booking, 'booking')
+        .innerJoin(User, 'users', 'users.id = booking.client_id ')
+        .innerJoin(Role, 'roles', 'users.role_id = roles.id')
+        .where('users.id = booking.client_id  OR users.id = :adminRoleId', {
+          adminRoleId: user.id,
+        })
+        .getMany();
     } catch (error) {
       this.#logger.error(error.message);
       throw new InternalServerErrorException('Error trying find bookings');

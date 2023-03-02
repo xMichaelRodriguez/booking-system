@@ -24,6 +24,8 @@ import {
 import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
 import { IFilterParams } from 'src/interfaces/filter.interface';
 
+import { GetUser } from '../auth/decorators/get-user.decorator';
+import User from '../auth/entities/auth.entity';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
@@ -89,8 +91,8 @@ export class BookingController {
   })
   @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
   @Get()
-  findAll(@Query() params: IFilterParams) {
-    return this.bookingService.findAll(params);
+  findAll(@GetUser() user: User) {
+    return this.bookingService.findAll(user);
   }
 
   @ApiOkResponse({
