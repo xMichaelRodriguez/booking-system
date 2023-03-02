@@ -156,6 +156,12 @@ export class AuthController {
   async googleSignIn(@Req() req) {
     return await this.authService.prepareUserRegister(req);
   }
+
+  @Get('/google-accesses')
+  async googleAccess(@Query() params: { access_token: string }) {
+    const { access_token } = params;
+    return this.authService.prepareLoginGoogle(access_token);
+  }
   @ApiOkResponse()
   @ApiInternalServerErrorResponse({
     schema: {
