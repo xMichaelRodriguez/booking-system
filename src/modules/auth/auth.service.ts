@@ -238,12 +238,16 @@ export class AuthService {
       isActive,
       role,
     };
-    const accessToken = await this.jwtService.sign(payload);
+    try {
+      const accessToken = await this.jwtService.sign(payload);
 
-    return {
-      user: new User(loginAuthDto),
-      jwt: accessToken,
-    };
+      return {
+        user: new User(loginAuthDto),
+        jwt: { accessToken },
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Error trying to sign in');
+    }
   }
 
   async prepareLoginGoogle(accessToken: string) {
