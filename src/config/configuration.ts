@@ -14,4 +14,7 @@ export class ConfigurationService {
   getapiBaseUrl() {
     return process.env.API_BASE_URL;
   }
+  getSender() {
+    return process.env.SG_MAIL_FROM;
+  }
 }
