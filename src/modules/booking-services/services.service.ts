@@ -43,7 +43,7 @@ export class BookingServicesService {
 
       const [data, total] = await this.servicesRepository
         .createQueryBuilder('services')
-        .orderBy('services.caption', order)
+        .orderBy('services.date', order)
         .skip(offset)
         .take(limit)
         .getManyAndCount();
