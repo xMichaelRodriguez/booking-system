@@ -10,7 +10,6 @@ export class EncoderService {
   }
 
   async checkPassword(password: string, hash: string): Promise<boolean> {
-    this.#logger.debug({ password, hash });
     return await bcrypt.compare(password, hash);
   }
 }
