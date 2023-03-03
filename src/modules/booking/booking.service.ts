@@ -5,11 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common/exceptions';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IFilterParams } from 'src/interfaces/filter.interface';
 import { Repository } from 'typeorm';
 
 import User from '../auth/entities/auth.entity';
 import { Services } from '../booking-services/entities/services.entity';
+import { RoleService } from '../role/role.service';
 import { Status } from '../status/entities/status.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
@@ -30,6 +30,8 @@ export class BookingService {
 
     @InjectRepository(Status)
     private readonly statusRepository: Repository<Status>,
+
+    private readonly roleService: RoleService,
   ) {}
   async create(
     createBookingDto: CreateBookingDto,
@@ -45,7 +47,6 @@ export class BookingService {
     const { client, service, status } = await this.findServiceClientStatus(
       booking.serviceId,
       booking.clientId,
-      booking.stateId,
     );
 
     const bookingToSave = this.bookingRepository.create({
@@ -85,7 +86,7 @@ export class BookingService {
   async findServiceClientStatus(
     serviceId: number,
     clientId: number,
-    stateId: number,
+    stateId?: number,
   ): Promise<{ service: Services; client: User; status: Status }> {
     const service = await this.servicesRepository.findOne({
       where: { id: serviceId },
@@ -99,26 +100,34 @@ export class BookingService {
 
     if (!client) throw new NotFoundException('Client not found');
 
-    const status = await this.statusRepository.findOne({
-      where: { id: stateId },
-    });
+    let status = null;
+    if (stateId)
+      status = await this.statusRepository.findOne({
+        where: { id: stateId },
+      });
+    else
+      status = await this.statusRepository.findOne({
+        where: { name: 'Reservado' },
+      });
 
     if (!status) throw new NotFoundException('Status not found');
 
     return { service, client, status };
   }
 
-  async findAll(params: IFilterParams = {} as IFilterParams) {
-    const {
-      clientId = null,
-      clientName = null,
-      serviceId = null,
-      serviceName = null,
-      statusId = null,
-      statusName = null,
-    } = params;
-
+  async findAll(user: User) {
     try {
+      // get admin role
+      const role = await this.roleService.getOne(1);
+      if (user.role.id === role.id)
+        return await this.bookingRepository.find({
+          relations: {
+            clientId: { role: true },
+            serviceId: true,
+            statusId: true,
+          },
+        });
+
       return await this.bookingRepository.find({
         relations: {
           clientId: true,
@@ -127,60 +136,13 @@ export class BookingService {
         },
         where: {
           clientId: {
-            id: clientId,
-            username: clientName,
-          },
-          serviceId: {
-            id: serviceId,
-            name: serviceName,
-          },
-          statusId: {
-            id: statusId,
-            name: statusName,
+            id: user.id,
           },
         },
       });
     } catch (error) {
       this.#logger.error(error.message);
       throw new InternalServerErrorException('Error trying find bookings');
-    }
-  }
-
-  async findOne(id: number, params: IFilterParams = {} as IFilterParams) {
-    const {
-      clientId = null,
-      clientName = null,
-      serviceId = null,
-      serviceName = null,
-      statusId = null,
-      statusName = null,
-    } = params;
-
-    try {
-      return await this.bookingRepository.findOne({
-        relations: {
-          clientId: true,
-          serviceId: true,
-          statusId: true,
-        },
-        where: {
-          clientId: {
-            id: clientId,
-            username: clientName,
-          },
-          serviceId: {
-            id: serviceId,
-            name: serviceName,
-          },
-          statusId: {
-            id: statusId,
-            name: statusName,
-          },
-        },
-      });
-    } catch (error) {
-      this.#logger.error(error.message);
-      throw new InternalServerErrorException('Error trying find booking');
     }
   }
 
@@ -231,21 +193,36 @@ export class BookingService {
     }
   }
 
-  processedDateAndHour(bookingDto: CreateBookingDto | UpdateBookingDto) {
-    const { hour, date } = bookingDto;
+  async updateStateBooking(id: number, stateId: number) {
+    try {
+      await this.bookingRepository
+        .createQueryBuilder()
+        .update(Booking)
+        .set({
+          statusId: {
+            id: stateId,
+          },
+        })
+        .where('id =:id', { id })
+        .execute();
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
 
-    const newHour = new Date(hour);
-    const newDate = new Date(date);
+  processedDateAndHour(bookingDto: CreateBookingDto | UpdateBookingDto) {
+    const { date } = bookingDto;
+    const dateObject = new Date(date);
     const processedTime = new Intl.DateTimeFormat('en-us', {
       hour: '2-digit',
       minute: '2-digit',
-    }).format(newHour);
+    }).format(dateObject);
 
     const processedDate = new Intl.DateTimeFormat('en-us', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-    }).format(newDate);
+    }).format(dateObject);
 
     return {
       processedDate,

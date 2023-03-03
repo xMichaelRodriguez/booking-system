@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
   ConflictException,
@@ -10,6 +11,9 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AxiosError } from 'axios';
+import { catchError, firstValueFrom } from 'rxjs';
+import { IGoogleAccount } from 'src/interfaces/gogle.interface';
 import { Repository } from 'typeorm';
 import { v4 } from 'uuid';
 
@@ -28,7 +32,7 @@ import { JwtPayload } from './interfaces/jwt.interface';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
+  #logger = new Logger(AuthService.name);
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -40,6 +44,8 @@ export class AuthService {
     private jwtService: JwtService,
 
     private mailService: MailService,
+
+    private readonly httpService: HttpService,
   ) {}
 
   async create(createAuthDto: CreateAuthDto): Promise<User> {
@@ -63,7 +69,7 @@ export class AuthService {
       if (error.code === '23505')
         throw new ConflictException('This email is already registered');
 
-      this.logger.error({ error });
+      this.#logger.error({ error });
 
       throw new InternalServerErrorException('Error creating user');
     }
@@ -71,6 +77,11 @@ export class AuthService {
 
   async login(loginAuthDto: LoginAuthDto) {
     const user = await this.findByEmail(loginAuthDto.email);
+
+    if (user.isGoogleAccount)
+      throw new BadRequestException(
+        'This email is already registered with a google account',
+      );
 
     const checkPassword = await this.encoderService.checkPassword(
       loginAuthDto.password,
@@ -115,7 +126,7 @@ export class AuthService {
         activationToken: null,
       });
     } catch (error) {
-      this.logger.error(error.message);
+      this.#logger.error(error.message);
       throw new InternalServerErrorException('Error trying activation account');
     }
   }
@@ -152,7 +163,7 @@ export class AuthService {
         { ...user, resetPasswordToken: v4() },
       );
     } catch (error) {
-      this.logger.error(error.message);
+      this.#logger.error(error.message);
       throw new InternalServerErrorException('Error trying to reset password');
     }
     // send email(e.g Dispatch an event so MailerModule can send the email  )
@@ -232,12 +243,45 @@ export class AuthService {
       isActive,
       role,
     };
-    const accessToken = await this.jwtService.sign(payload);
+    try {
+      const accessToken = await this.jwtService.sign(payload);
 
-    return {
-      user: new User(loginAuthDto),
-      jwt: accessToken,
-    };
+      return {
+        user: new User(loginAuthDto),
+        jwt: { accessToken },
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Error trying to sign in');
+    }
+  }
+
+  async prepareLoginGoogle(accessToken: string) {
+    const { data } = await firstValueFrom(
+      this.httpService
+        .get<IGoogleAccount>(`https://www.googleapis.com/oauth2/v3/userinfo`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .pipe(
+          catchError((error: AxiosError) => {
+            this.#logger.error(error.response.data);
+            throw new Error('An error happened!');
+          }),
+        ),
+    );
+    const userExist: User = await this.userRepository.findOne({
+      where: { email: data.email },
+      relations: { role: true },
+    });
+    const user = {
+      username: data.name,
+      email: data.email,
+    } as User;
+
+    if (!userExist) return this.registerUserWithGoogle(user);
+
+    return this.loginWithGoogle(userExist);
   }
 
   async registerUserWithGoogle(user: CreateGoogleDto) {
@@ -267,7 +311,7 @@ export class AuthService {
       if (error.code === '23505')
         throw new ConflictException('This email is already registered');
 
-      this.logger.debug(error);
+      this.#logger.debug(error);
 
       throw new InternalServerErrorException('Error creating user');
     }

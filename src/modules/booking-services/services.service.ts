@@ -1,16 +1,26 @@
+import { HttpService } from '@nestjs/axios';
 import {
-  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Logger } from '@nestjs/common/services';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AxiosError } from 'axios';
+import { catchError, firstValueFrom } from 'rxjs';
+import { ConfigurationService } from 'src/config/configuration';
 import { Repository } from 'typeorm';
 
-import { CreateServiceDto } from './dto/create-service.dto';
-import { UpdateServiceDto } from './dto/update-service.dto';
+import { PaginatedServicesDto } from './dto/pagination-service.dto';
 import { Services } from './entities/services.entity';
+import { OrderType } from './enums/sort-enum';
+import {
+  IService,
+  IServiceIg,
+  IServiceParsed,
+  IServicePaging,
+} from './interface/service.interface';
 
 @Injectable()
 export class BookingServicesService {
@@ -18,26 +28,35 @@ export class BookingServicesService {
   constructor(
     @InjectRepository(Services)
     private readonly servicesRepository: Repository<Services>,
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigurationService,
   ) {}
-  async create(createBookingServiceDto: CreateServiceDto) {
-    const serviceToSave = this.servicesRepository.create(
-      createBookingServiceDto,
-    );
+
+  async paginate(
+    page: number,
+    limit: number,
+    order: OrderType,
+    apiBaseUrl: string,
+  ): Promise<PaginatedServicesDto> {
     try {
-      return await this.servicesRepository.save(serviceToSave);
-    } catch (error) {
-      if (error.code === '23505')
-        throw new ConflictException('This service is already registered');
+      const offset = (page - 1) * limit;
 
-      this.#logger.error(error.message);
+      const [data, total] = await this.servicesRepository
+        .createQueryBuilder('services')
+        .orderBy('services.caption', order)
+        .skip(offset)
+        .take(limit)
+        .getManyAndCount();
 
-      throw new InternalServerErrorException('Error creating Service');
-    }
-  }
-
-  async findAll() {
-    try {
-      return await this.servicesRepository.find();
+      const nextPage =
+        total > offset + limit
+          ? `${apiBaseUrl}/services?page=${page + 1}&limit=${limit}`
+          : null;
+      const prevPage =
+        offset > 0
+          ? `${apiBaseUrl}/services?page=${page - 1}&limit=${limit}`
+          : null;
+      return { data, total, prevPage, nextPage };
     } catch (error) {
       throw new InternalServerErrorException('Error trying search services');
     }
@@ -54,33 +73,92 @@ export class BookingServicesService {
     return service;
   }
 
-  async update(id: number, updateBookingServiceDto: UpdateServiceDto) {
-    await this.findOne(id);
+  @Cron(CronExpression.EVERY_WEEK)
+  async getIgProductsCron() {
     try {
-      await this.servicesRepository
-        .createQueryBuilder()
-        .update(Services)
-        .set(updateBookingServiceDto)
-        .where('id=:id', { id })
-        .execute();
+      const baseUrl = this.configService.getbaseUrl();
+      const token = this.configService.getAccessToken();
+
+      const allProducts = await this.fetchAllProducts(baseUrl, token);
+
+      const newProducts = await this.filterNewProducts(allProducts);
+
+      const parsedProducts: IServiceParsed[] =
+        this.parsedNewProducts(newProducts);
+
+      await this.insertNewProducts(parsedProducts);
     } catch (error) {
       this.#logger.error(error.message);
-      throw new InternalServerErrorException('Error trying update service');
     }
   }
 
-  async remove(id: number) {
-    await this.findOne(id);
-    try {
-      await this.servicesRepository
-        .createQueryBuilder('services')
-        .delete()
-        .from(Services)
-        .where('id=:id', { id })
-        .execute();
-    } catch (error) {
-      this.#logger.error(error.message);
-      throw new InternalServerErrorException('Error trying remove service');
-    }
+  async fetchAllProducts(baseUrl: string, token: string) {
+    let url = `${baseUrl}/v16.0/me/media?fields=id,caption,media_url,thumbnail_url&access_token=${token}&limit=25`;
+    let allProducts = [];
+    let data: IServiceIg;
+    do {
+      data = await this.fetchDataFromApi(url);
+      allProducts = [...allProducts, ...data.data];
+
+      if (data.paging.next) {
+        const nextUrl = new URL(data.paging.next);
+        url = `${baseUrl}${
+          nextUrl.pathname
+        }?fields=id,caption,media_url,thumbnail_url&access_token=${token}&limit=25&after=${nextUrl.searchParams.get(
+          'after',
+        )}`;
+      }
+    } while (data.paging.next);
+    return allProducts;
+  }
+
+  async filterNewProducts(products: IService[]) {
+    const existingProducts = await this.servicesRepository.find();
+    const existingIds = existingProducts.map(product => product.igPostId);
+
+    const newProducts = products.filter(
+      product => !existingIds.includes(product.id),
+    );
+    return newProducts;
+  }
+
+  parsedNewProducts(newProducts: IService[]) {
+    // Rename property "id" to "igPostId"
+    const newProductsRenamed = newProducts.map(product => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, media_url: mediaUrl, thumbnail_url, caption } = product;
+      return {
+        caption,
+        mediaUrl,
+        igPostId: +id,
+      };
+    });
+
+    return newProductsRenamed;
+  }
+
+  async insertNewProducts(newProducts: IServiceParsed[]) {
+    await this.servicesRepository
+      .createQueryBuilder()
+      .createQueryBuilder()
+      .insert()
+      .into(Services)
+      .values(newProducts)
+      .execute();
+
+    this.#logger.debug('DATA SAVED');
+  }
+
+  async fetchDataFromApi(url: string) {
+    const { data } = await firstValueFrom(
+      this.httpService.get<IServiceIg>(url).pipe(
+        catchError((error: AxiosError) => {
+          this.#logger.error(error.response.data);
+          throw new Error('An error happened!');
+        }),
+      ),
+    );
+    const dataFilterd = data.data.filter(service => !service.thumbnail_url);
+    return { data: dataFilterd, paging: data.paging as IServicePaging };
   }
 }

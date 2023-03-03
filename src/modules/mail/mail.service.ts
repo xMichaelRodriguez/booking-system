@@ -1,7 +1,9 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable } from '@nestjs/common';
-import { InternalServerErrorException } from '@nestjs/common/exceptions';
-import { Logger } from '@nestjs/common/services';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigurationService } from 'src/config/configuration';
 
 import User from '../auth/entities/auth.entity';
@@ -13,10 +15,9 @@ export class MailService {
 
   async sendVerificationUsers(user: User, token: string) {
     const configService = new ConfigurationService();
-    const url = `${configService.getApiUrl()}/api/v1/auth/activate-accounts/?id=${
+    const url = `${configService.getapiBaseUrl()}/api/v1/auth/activate-accounts/?id=${
       user.id
     }&code=${token}`;
-
     const sendMailOptions = {
       from: configService.getSender(),
       to: user.email,
