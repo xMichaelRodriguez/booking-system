@@ -78,6 +78,11 @@ export class AuthService {
   async login(loginAuthDto: LoginAuthDto) {
     const user = await this.findByEmail(loginAuthDto.email);
 
+    if (user.isGoogleAccount)
+      throw new BadRequestException(
+        'This email is already registered with a google account',
+      );
+
     const checkPassword = await this.encoderService.checkPassword(
       loginAuthDto.password,
       user.password,
