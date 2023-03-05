@@ -73,7 +73,7 @@ export class BookingServicesService {
     return service;
   }
 
-  @Cron(CronExpression.EVERY_WEEK)
+  @Cron(CronExpression.EVERY_DAY_AT_10AM)
   async getIgProductsCron() {
     try {
       const baseUrl = this.configService.getbaseUrl();
