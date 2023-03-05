@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 
 import User from '../auth/entities/auth.entity';
 import { Services } from '../booking-services/entities/services.entity';
+import { OrderType } from '../booking-services/enums/sort-enum';
 import { RoleService } from '../role/role.service';
 import { Status } from '../status/entities/status.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
@@ -125,6 +126,9 @@ export class BookingService {
             clientId: { role: true },
             serviceId: true,
             statusId: true,
+          },
+          order: {
+            date: OrderType.DESC,
           },
         });
 

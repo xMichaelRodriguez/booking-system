@@ -43,7 +43,7 @@ export class BookingServicesService {
 
       const [data, total] = await this.servicesRepository
         .createQueryBuilder('services')
-        .orderBy('services.date', order)
+        .orderBy('services.caption', order)
         .skip(offset)
         .take(limit)
         .getManyAndCount();
@@ -58,6 +58,7 @@ export class BookingServicesService {
           : null;
       return { data, total, prevPage, nextPage };
     } catch (error) {
+      this.#logger.error(error.message);
       throw new InternalServerErrorException('Error trying search services');
     }
   }

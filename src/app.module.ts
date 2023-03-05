@@ -33,7 +33,7 @@ import { StatusModule } from './modules/status/status.module';
               type: 'postgres',
               url: process.env.DATABASE_URL,
               autoLoadEntities: true,
-              synchronize: true,
+              synchronize: false,
               entities: ['./dist/**/*.entity.js'],
             }
           : {
