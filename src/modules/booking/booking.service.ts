@@ -220,6 +220,7 @@ export class BookingService {
     const processedTime = new Intl.DateTimeFormat('en-us', {
       hour: '2-digit',
       minute: '2-digit',
+      hour12: false,
     }).format(dateObject);
 
     const processedDate = new Intl.DateTimeFormat('en-us', {
