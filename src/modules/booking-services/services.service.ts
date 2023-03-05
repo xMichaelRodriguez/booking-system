@@ -74,7 +74,7 @@ export class BookingServicesService {
     return service;
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES_BETWEEN_9AM_AND_5PM)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async getIgProductsCron() {
     try {
       const baseUrl = this.configService.getbaseUrl();
@@ -115,11 +115,13 @@ export class BookingServicesService {
 
   async filterNewProducts(products: IService[]) {
     const existingProducts = await this.servicesRepository.find();
-    const existingIds = existingProducts.map(product => product.igPostId);
 
-    const newProducts = products.filter(
-      product => !existingIds.includes(product.id),
-    );
+    const existingIds = existingProducts.map(product => +product.igPostId);
+
+    const newProducts = products.filter(product => {
+      return !existingIds.includes(+product.id);
+    });
+
     return newProducts;
   }
 
@@ -139,15 +141,19 @@ export class BookingServicesService {
   }
 
   async insertNewProducts(newProducts: IServiceParsed[]) {
-    await this.servicesRepository
-      .createQueryBuilder()
-      .createQueryBuilder()
-      .insert()
-      .into(Services)
-      .values(newProducts)
-      .execute();
+    try {
+      await this.servicesRepository
+        .createQueryBuilder()
+        .insert()
+        .into(Services)
+        .values(newProducts)
+        .execute();
 
-    this.#logger.debug('DATA SAVED');
+      this.#logger.debug('DATA SAVED');
+    } catch (error) {
+      this.#logger.error(error.messge);
+      throw new InternalServerErrorException('error trying save Data');
+    }
   }
 
   async fetchDataFromApi(url: string) {
