@@ -64,14 +64,7 @@ export class BookingController {
   @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('AUTHENTICATED'))
   @Post()
   create(@Body() createBookingDto: CreateBookingDto) {
-    const { processedDate, processedTime } =
-      this.bookingService.processedDateAndHour(createBookingDto);
-
-    return this.bookingService.create(
-      createBookingDto,
-      processedTime,
-      processedDate,
-    );
+    return this.bookingService.create(createBookingDto);
   }
 
   @ApiOkResponse({
@@ -109,14 +102,7 @@ export class BookingController {
   @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBookingDto: UpdateBookingDto) {
-    const { processedDate, processedTime } =
-      this.bookingService.processedDateAndHour(updateBookingDto);
-    return this.bookingService.update(
-      +id,
-      updateBookingDto,
-      processedTime,
-      processedDate,
-    );
+    return this.bookingService.update(+id, updateBookingDto);
   }
 
   @Patch('/:id/update-states')

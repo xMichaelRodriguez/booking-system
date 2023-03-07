@@ -46,24 +46,12 @@ export class Booking {
   statusId: Status;
 
   @ApiProperty({
-    example: '01/14/2023',
+    example: '2023-03-06T01:30Z',
   })
   @Column({
-    type: 'varchar',
+    type: 'timestamp',
     nullable: false,
     name: 'date',
-    length: 10,
   })
-  date: string;
-
-  @ApiProperty({
-    example: '12:00 AM',
-  })
-  @Column({
-    type: 'varchar',
-    nullable: false,
-    name: 'hour',
-    length: 8,
-  })
-  hour: string;
+  date: Date;
 }

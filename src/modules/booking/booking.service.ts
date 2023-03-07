@@ -34,32 +34,20 @@ export class BookingService {
 
     private readonly roleService: RoleService,
   ) {}
-  async create(
-    createBookingDto: CreateBookingDto,
-    processedTime: string,
-    processedDate: string,
-  ) {
-    const booking = {
-      ...createBookingDto,
-      date: processedDate,
-      hour: processedTime,
-    };
-
+  async create(createBookingDto: CreateBookingDto) {
     const { client, service, status } = await this.findServiceClientStatus(
-      booking.serviceId,
-      booking.clientId,
+      createBookingDto.serviceId,
+      createBookingDto.clientId,
     );
 
     const bookingToSave = this.bookingRepository.create({
-      ...booking,
+      ...createBookingDto,
       clientId: new User(client),
       serviceId: service,
       statusId: status,
     });
-    const isValidBooking = await this.checkReservationValid(
-      bookingToSave.hour,
-      bookingToSave.date,
-    );
+    const dateToCheck = new Date(createBookingDto.date);
+    const isValidBooking = await this.checkReservationValid(dateToCheck);
     if (isValidBooking)
       throw new ConflictException(
         'A reservation already exists for the time you are trying to book',
@@ -75,10 +63,25 @@ export class BookingService {
     }
   }
 
-  async checkReservationValid(hour: string, date: string) {
+  async checkReservationValid(date: Date) {
+    const MINIMUM_TIME_DIFFERENCE = 30;
+    const ONE_MINUTE = 60000;
     try {
-      const bookings = await this.bookingRepository.findBy({ date });
-      return bookings.some(booking => booking.hour === hour);
+      const bookings = await this.bookingRepository
+        .createQueryBuilder('booking')
+        .where(`DATE(booking.date) = :date`, { date })
+        .getMany();
+
+      return bookings.some(booking => {
+        const dbReservationTime = new Date(booking.date);
+        const diffInMinutes = Math.abs(
+          Math.round(
+            (dbReservationTime.getTime() - date.getTime()) / ONE_MINUTE,
+          ),
+        );
+
+        return diffInMinutes > MINIMUM_TIME_DIFFERENCE;
+      });
     } catch (error) {
       this.#logger.error(error.message);
       throw new InternalServerErrorException('Error trying create booking');
@@ -150,34 +153,20 @@ export class BookingService {
     }
   }
 
-  async update(
-    id: number,
-    updateBookingDto: UpdateBookingDto,
-    processedTime: string,
-    processedDate: string,
-  ) {
-    const booking = {
-      ...updateBookingDto,
-      date: processedDate,
-      hour: processedTime,
-    };
-
+  async update(id: number, updateBookingDto: UpdateBookingDto) {
     const { client, service, status } = await this.findServiceClientStatus(
-      booking.serviceId,
-      booking.clientId,
-      booking.stateId,
+      updateBookingDto.serviceId,
+      updateBookingDto.clientId,
+      updateBookingDto.stateId,
     );
 
     const bookingToSave = this.bookingRepository.create({
-      ...booking,
+      ...updateBookingDto,
       clientId: new User(client),
       serviceId: service,
       statusId: status,
     });
-    const isValidBooking = await this.checkReservationValid(
-      bookingToSave.hour,
-      bookingToSave.date,
-    );
+    const isValidBooking = await this.checkReservationValid(bookingToSave.date);
     if (isValidBooking)
       throw new ConflictException(
         'A reservation already exists for the time you are trying to book',
