@@ -56,7 +56,6 @@ export class BookingService {
     try {
       return await this.bookingRepository.save(bookingToSave);
     } catch (error) {
-      this.#logger.debug({ error });
       this.#logger.error(error.message);
 
       throw new InternalServerErrorException('Error trying create booking');
@@ -72,6 +71,8 @@ export class BookingService {
         .where(`DATE(booking.date) = :date`, { date })
         .getMany();
 
+      date = new Date(date);
+
       return bookings.some(booking => {
         const dbReservationTime = new Date(booking.date);
         const diffInMinutes = Math.abs(
@@ -80,7 +81,7 @@ export class BookingService {
           ),
         );
 
-        return diffInMinutes > MINIMUM_TIME_DIFFERENCE;
+        return diffInMinutes < MINIMUM_TIME_DIFFERENCE;
       });
     } catch (error) {
       this.#logger.error(error.message);

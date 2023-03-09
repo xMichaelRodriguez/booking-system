@@ -110,7 +110,6 @@ export class BookingController {
     @Param('id') id: string,
     @Body() updateStateBookingDto: UpdateStateBookingDto,
   ) {
-    this.#logger.debug({ id, updateStateBookingDto });
     return this.bookingService.updateStateBooking(
       +id,
       updateStateBookingDto.stateId,
