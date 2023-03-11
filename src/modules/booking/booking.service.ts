@@ -39,9 +39,11 @@ export class BookingService {
       createBookingDto.serviceId,
       createBookingDto.clientId,
     );
+    const formatDate = new Date(createBookingDto.date).toISOString();
 
     const bookingToSave = this.bookingRepository.create({
       ...createBookingDto,
+      date: formatDate,
       clientId: new User(client),
       serviceId: service,
       statusId: status,
