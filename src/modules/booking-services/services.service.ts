@@ -74,9 +74,10 @@ export class BookingServicesService {
     return service;
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_DAY_AT_10AM)
   async getIgProductsCron() {
     try {
+      await this.deleteProducts();
       const baseUrl = this.configService.getbaseUrl();
       const token = this.configService.getAccessToken();
 
@@ -93,6 +94,20 @@ export class BookingServicesService {
     }
   }
 
+  async deleteProducts() {
+    try {
+      await this.servicesRepository
+        .createQueryBuilder()
+        .delete()
+        .from(Services)
+        .execute();
+
+      this.#logger.debug('DATA REMOVED');
+    } catch (error) {
+      this.#logger.error(error.messge);
+      throw new InternalServerErrorException('error trying delete Data');
+    }
+  }
   async fetchAllProducts(baseUrl: string, token: string) {
     let url = `${baseUrl}/v16.0/me/media?fields=id,caption,media_url,thumbnail_url&access_token=${token}&limit=25`;
     let allProducts = [];
