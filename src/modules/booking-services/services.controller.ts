@@ -1,5 +1,18 @@
-import { Controller, Get, Param, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  UseGuards,
+  Query,
+  UseInterceptors,
+  UploadedFile,
+  Body,
+} from '@nestjs/common';
+import { ParseFilePipeBuilder } from '@nestjs/common/pipes/file';
+import { Logger } from '@nestjs/common/services';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -13,6 +26,7 @@ import { ConfigurationService } from 'src/config/configuration';
 import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
 
 import { PaginationQueryDto } from '../../interfaces/pagination-query.dto';
+import { CreateServiceDto } from './dto/create-service.dto';
 import { Services } from './entities/services.entity';
 import { BookingServicesService } from './services.service';
 
@@ -20,10 +34,27 @@ import { BookingServicesService } from './services.service';
 @ApiTags('Services')
 @Controller('services')
 export class BookingServicesController {
+  #logger = new Logger(BookingServicesController.name);
   constructor(
     private readonly bookingServicesService: BookingServicesService,
     private readonly configService: ConfigurationService,
   ) {}
+
+  @Post()
+  @UseInterceptors(FileInterceptor('file'))
+  async create(
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: /(gif|jpeg|png|jpg)/gi,
+        })
+        .build(),
+    )
+    file: Express.Multer.File,
+    @Body() createServiceDto: CreateServiceDto,
+  ) {
+    return this.bookingServicesService.create(file, createServiceDto);
+  }
 
   @ApiOkResponse({
     description: 'List Services',
