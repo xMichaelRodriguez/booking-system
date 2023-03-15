@@ -10,6 +10,7 @@ import {
   Body,
   HttpStatus,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import {
   ParseFilePipe,
@@ -205,6 +206,46 @@ export class BookingServicesController {
   }
 
   @ApiOkResponse({
+    description: 'Uptade image of service',
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+      },
+    },
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Forbbiden Role',
+        error: 'ForbbidenException',
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Error trying to update image of services',
+        error: 'InternalServerError',
+      },
+    },
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'id service',
+    example: 1,
+  })
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN'))
+  @Delete('/:id')
+  async removeItem(@Param('id') id: string) {
+    return this.bookingServicesService.deleteProduct(+id);
+  }
+
+  @ApiOkResponse({
     description: 'List Services',
     type: Services,
     isArray: true,
@@ -281,7 +322,7 @@ export class BookingServicesController {
       },
     },
   })
-  @UseGuards(AuthGuard(['jwt']), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.bookingServicesService.findOne(+id);

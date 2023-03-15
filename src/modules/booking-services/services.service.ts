@@ -48,7 +48,8 @@ export class BookingServicesService {
 
       // If the error is an HttpException, it means it was thrown by Nest
       // so we don't need to delete the image since it was never uploaded
-      if (error instanceof HttpException) throw error;
+      if (error instanceof HttpException)
+        throw new InternalServerErrorException(error.message);
 
       // If the error is not an HttpException, it means it was thrown by Cloudinary
       // so we need to delete the image since it was uploaded successfully
@@ -111,6 +112,7 @@ export class BookingServicesService {
       );
     }
   }
+
   async paginate(
     page: number,
     limit: number,
@@ -122,7 +124,7 @@ export class BookingServicesService {
 
       const [data, total] = await this.servicesRepository
         .createQueryBuilder('services')
-        .orderBy('services.caption', order)
+        .orderBy('services.name', order)
         .skip(offset)
         .take(limit)
         .getManyAndCount();
@@ -153,15 +155,16 @@ export class BookingServicesService {
     return service;
   }
 
-  async deleteProducts() {
+  async deleteProduct(id: number) {
     try {
+      const service = await this.findOne(id);
+      await this.cloudinaryService.removeImage(service.publicId);
       await this.servicesRepository
         .createQueryBuilder()
         .delete()
         .from(Services)
+        .where('id = :id', { id })
         .execute();
-
-      this.#logger.debug('DATA REMOVED');
     } catch (error) {
       this.#logger.error(error.messge);
       throw new InternalServerErrorException('error trying delete Data');
