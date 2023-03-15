@@ -21,10 +21,6 @@ export class CreateServiceDto {
   @ApiProperty({
     example: '10.20',
   })
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsDecimal({
-    decimal_digits: '2',
-  })
-  price: number;
+  @IsDecimal({ decimal_digits: '2' })
+  price: string;
 }

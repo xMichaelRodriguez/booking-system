@@ -1,26 +1,19 @@
-import { HttpService } from '@nestjs/axios';
 import {
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Logger } from '@nestjs/common/services';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AxiosError } from 'axios';
-import { catchError, firstValueFrom } from 'rxjs';
-import { ConfigurationService } from 'src/config/configuration';
 import { Repository } from 'typeorm';
 
+import { OrderType } from '../../enums/sort-enum';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { CreateServiceDto } from './dto/create-service.dto';
 import { PaginatedServicesDto } from './dto/pagination-service.dto';
+import { UpdateServiceDto } from './dto/update-service.dto';
 import { Services } from './entities/services.entity';
-import { OrderType } from './enums/sort-enum';
-import {
-  IService,
-  IServiceIg,
-  IServiceParsed,
-  IServicePaging,
-} from './interface/service.interface';
 
 @Injectable()
 export class BookingServicesService {
@@ -28,9 +21,97 @@ export class BookingServicesService {
   constructor(
     @InjectRepository(Services)
     private readonly servicesRepository: Repository<Services>,
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigurationService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
+
+  async create(
+    file: Express.Multer.File,
+    createServiceDto: CreateServiceDto,
+  ): Promise<Services> {
+    let publicId: string;
+    try {
+      const { secure_url, public_id } =
+        await this.cloudinaryService.uploadImage(file);
+
+      const secureUrl: string = secure_url;
+      publicId = public_id;
+      const serviceParsed = {
+        ...createServiceDto,
+        secureUrl,
+        publicId,
+      };
+      const serviceToSave = this.servicesRepository.create(serviceParsed);
+
+      return await this.servicesRepository.save(serviceToSave);
+    } catch (error) {
+      this.#logger.error(error.message);
+
+      // If the error is an HttpException, it means it was thrown by Nest
+      // so we don't need to delete the image since it was never uploaded
+      if (error instanceof HttpException)
+        throw new InternalServerErrorException(error.message);
+
+      // If the error is not an HttpException, it means it was thrown by Cloudinary
+      // so we need to delete the image since it was uploaded successfully
+      await this.cloudinaryService.removeImage(publicId);
+
+      throw new InternalServerErrorException('Error trying create service');
+    }
+  }
+
+  async update(id: number, updateServiceDto: UpdateServiceDto) {
+    try {
+      await this.findOne(id);
+      await this.servicesRepository
+        .createQueryBuilder()
+        .update()
+        .set(updateServiceDto)
+        .where('id = :id', { id })
+        .execute();
+    } catch (error) {
+      this.#logger.error(error.message);
+      throw new InternalServerErrorException('Error trying to update service');
+    }
+  }
+
+  async updateImage(id: number, file: Express.Multer.File) {
+    let publicId: string;
+    try {
+      const service = await this.findOne(id);
+      await this.cloudinaryService.removeImage(service.publicId);
+
+      const { secure_url, public_id } =
+        await this.cloudinaryService.uploadImage(file);
+
+      const secureUrl: string = secure_url;
+      publicId = public_id;
+
+      const serviceParsed = {
+        secureUrl,
+        publicId,
+      };
+      await this.servicesRepository
+        .createQueryBuilder()
+        .update()
+        .set(serviceParsed)
+        .where('id := id', { id })
+        .execute();
+    } catch (error) {
+      this.#logger.error(error.message);
+
+      // If the error is an HttpException, it means it was thrown by Nest
+      // so we don't need to delete the image since it was never uploaded
+      if (error instanceof HttpException) throw error;
+
+      // If the error is not an HttpException, it means it was thrown by Cloudinary
+      // so we need to delete the image since it was uploaded successfully
+      await this.cloudinaryService.removeImage(publicId);
+
+      throw new InternalServerErrorException(
+        'Error trying to update Image of service',
+      );
+    }
+  }
 
   async paginate(
     page: number,
@@ -43,7 +124,7 @@ export class BookingServicesService {
 
       const [data, total] = await this.servicesRepository
         .createQueryBuilder('services')
-        .orderBy('services.caption', order)
+        .orderBy('services.name', order)
         .skip(offset)
         .take(limit)
         .getManyAndCount();
@@ -74,113 +155,19 @@ export class BookingServicesService {
     return service;
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_10AM)
-  async getIgProductsCron() {
+  async deleteProduct(id: number) {
     try {
-      await this.deleteProducts();
-      const baseUrl = this.configService.getbaseUrl();
-      const token = this.configService.getAccessToken();
-
-      const allProducts = await this.fetchAllProducts(baseUrl, token);
-
-      const newProducts = await this.filterNewProducts(allProducts);
-
-      const parsedProducts: IServiceParsed[] =
-        this.parsedNewProducts(newProducts);
-
-      await this.insertNewProducts(parsedProducts);
-    } catch (error) {
-      this.#logger.error(error.message);
-    }
-  }
-
-  async deleteProducts() {
-    try {
+      const service = await this.findOne(id);
+      await this.cloudinaryService.removeImage(service.publicId);
       await this.servicesRepository
         .createQueryBuilder()
         .delete()
         .from(Services)
+        .where('id = :id', { id })
         .execute();
-
-      this.#logger.debug('DATA REMOVED');
     } catch (error) {
       this.#logger.error(error.messge);
       throw new InternalServerErrorException('error trying delete Data');
     }
-  }
-  async fetchAllProducts(baseUrl: string, token: string) {
-    let url = `${baseUrl}/v16.0/me/media?fields=id,caption,media_url,thumbnail_url&access_token=${token}&limit=25`;
-    let allProducts = [];
-    let data: IServiceIg;
-    do {
-      data = await this.fetchDataFromApi(url);
-      allProducts = [...allProducts, ...data.data];
-
-      if (data.paging.next) {
-        const nextUrl = new URL(data.paging.next);
-        url = `${baseUrl}${
-          nextUrl.pathname
-        }?fields=id,caption,media_url,thumbnail_url&access_token=${token}&limit=25&after=${nextUrl.searchParams.get(
-          'after',
-        )}`;
-      }
-    } while (data.paging.next);
-    return allProducts;
-  }
-
-  async filterNewProducts(products: IService[]) {
-    const existingProducts = await this.servicesRepository.find();
-
-    const existingIds = existingProducts.map(product => +product.igPostId);
-
-    const newProducts = products.filter(product => {
-      return !existingIds.includes(+product.id);
-    });
-
-    return newProducts;
-  }
-
-  parsedNewProducts(newProducts: IService[]) {
-    // Rename property "id" to "igPostId"
-    const newProductsRenamed = newProducts.map(product => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, media_url: mediaUrl, thumbnail_url, caption } = product;
-      return {
-        caption,
-        mediaUrl,
-        igPostId: +id,
-      };
-    });
-
-    return newProductsRenamed;
-  }
-
-  async insertNewProducts(newProducts: IServiceParsed[]) {
-    try {
-      await this.servicesRepository
-        .createQueryBuilder()
-        .insert()
-        .into(Services)
-        .values(newProducts)
-        .execute();
-
-      this.#logger.debug('DATA SAVED');
-    } catch (error) {
-      this.#logger.error(error.messge);
-      throw new InternalServerErrorException('error trying save Data');
-    }
-  }
-
-  async fetchDataFromApi(url: string) {
-    const { data } = await firstValueFrom(
-      this.httpService.get<IServiceIg>(url).pipe(
-        catchError((error: AxiosError) => {
-          this.#logger.error(error.response.data);
-          throw new Error('An error happened!');
-        }),
-      ),
-    );
-    const dataFilterd = data.data.filter(service => !service.thumbnail_url);
-    return { data: dataFilterd, paging: data.paging as IServicePaging };
   }
 }

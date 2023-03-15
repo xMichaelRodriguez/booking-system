@@ -13,28 +13,53 @@ export class Services {
   @ApiProperty({
     example: '1234455665',
   })
-  @Column({ name: 'ig_post_id', type: 'varchar', nullable: false })
-  igPostId: number;
+  @Column({ name: 'name', type: 'varchar', nullable: false })
+  name: string;
 
   @ApiProperty({
-    example: 'https://example.com',
+    example:
+      'Non excepteur reprehenderit fugiat consequat aliqua sunt Lorem sint non pariatur nostrud excepteur laboris proident.',
   })
   @Column({
     type: 'varchar',
     nullable: false,
-    name: 'media_url',
+    name: 'description',
+    length: 500,
   })
-  mediaUrl: string;
+  description: string;
 
   @ApiProperty({
-    example: 'example service description',
+    example: 10.3,
   })
-  @Column({ type: 'varchar', name: 'caption', nullable: true })
-  caption: string;
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    name: 'price',
+    nullable: false,
+  })
+  price: string;
 
   @ApiProperty({
-    example: 'https://example.com',
+    example: 'https://example.png',
   })
+  @Column({
+    type: 'varchar',
+    name: 'secure_url',
+    nullable: false,
+  })
+  secureUrl: string;
+
+  @ApiProperty({
+    example: 'dfukhsfghukdxfbjwefuibdx',
+  })
+  @Column({
+    type: 'varchar',
+    name: 'public_id',
+    nullable: false,
+  })
+  publicId: string;
+
   @OneToMany(() => Booking, booking => booking.serviceId)
   booking: number;
 }
