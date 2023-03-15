@@ -7,7 +7,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { OrderType } from 'src/modules/booking-services/enums/sort-enum';
+import { OrderType } from 'src/enums/sort-enum';
 
 export class PaginationQueryDto {
   @ApiPropertyOptional({

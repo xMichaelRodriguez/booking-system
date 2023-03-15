@@ -13,7 +13,7 @@ export class Services {
   @ApiProperty({
     example: '1234455665',
   })
-  @Column({ name: 'name', type: 'varchar', nullable: false, length: 16 })
+  @Column({ name: 'name', type: 'varchar', nullable: false })
   name: string;
 
   @ApiProperty({
@@ -24,7 +24,7 @@ export class Services {
     type: 'varchar',
     nullable: false,
     name: 'description',
-    length: 200,
+    length: 500,
   })
   description: string;
 
@@ -38,7 +38,7 @@ export class Services {
     name: 'price',
     nullable: false,
   })
-  price: number;
+  price: string;
 
   @ApiProperty({
     example: 'https://example.png',

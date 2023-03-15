@@ -8,25 +8,36 @@ import {
   UseInterceptors,
   UploadedFile,
   Body,
+  HttpStatus,
+  Patch,
 } from '@nestjs/common';
-import { ParseFilePipeBuilder } from '@nestjs/common/pipes/file';
+import {
+  ParseFilePipe,
+  FileTypeValidator,
+  MaxFileSizeValidator,
+} from '@nestjs/common/pipes/file';
 import { Logger } from '@nestjs/common/services';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiConsumes,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ConfigurationService } from 'src/config/configuration';
+import { FILE_SIZE } from 'src/enums/file-size';
 import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
+import { FileRequiredPipePipe } from 'src/pipes/file-required-pipe.pipe';
 
 import { PaginationQueryDto } from '../../interfaces/pagination-query.dto';
 import { CreateServiceDto } from './dto/create-service.dto';
+import { UpdateServiceDto } from './dto/update-service.dto';
 import { Services } from './entities/services.entity';
 import { BookingServicesService } from './services.service';
 
@@ -40,20 +51,157 @@ export class BookingServicesController {
     private readonly configService: ConfigurationService,
   ) {}
 
+  @ApiConsumes('multipart/form-data')
+  @ApiOkResponse({
+    description: 'Uptade service',
+    type: Services,
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+      },
+    },
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Forbbiden Role',
+        error: 'ForbbidenException',
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Error trying to update image of services',
+        error: 'InternalServerError',
+      },
+    },
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'id service',
+    example: 1,
+  })
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN'))
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('image'))
   async create(
     @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: /(gif|jpeg|png|jpg)/gi,
-        })
-        .build(),
+      new FileRequiredPipePipe(),
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: FILE_SIZE }),
+          new FileTypeValidator({ fileType: /(gif|jpeg|png|jpg)/gi }),
+        ],
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      }),
     )
     file: Express.Multer.File,
     @Body() createServiceDto: CreateServiceDto,
-  ) {
+  ): Promise<Services> {
     return this.bookingServicesService.create(file, createServiceDto);
+  }
+  @ApiOkResponse({
+    description: 'Uptade service',
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+      },
+    },
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Forbbiden Role',
+        error: 'ForbbidenException',
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Error trying to update image of services',
+        error: 'InternalServerError',
+      },
+    },
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'id service',
+    example: 1,
+  })
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN'))
+  @Patch('/:id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateServiceDto: UpdateServiceDto,
+  ): Promise<void> {
+    return this.bookingServicesService.update(+id, updateServiceDto);
+  }
+
+  @ApiConsumes('multipart/form-data')
+  @ApiOkResponse({
+    description: 'Uptade image of service',
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+      },
+    },
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Forbbiden Role',
+        error: 'ForbbidenException',
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Error trying to update image of services',
+        error: 'InternalServerError',
+      },
+    },
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'id service',
+    example: 1,
+  })
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN'))
+  @Patch('/:id/images')
+  @UseInterceptors(FileInterceptor('image'))
+  async updateimage(
+    @Param('id') id: string,
+    @UploadedFile(
+      new FileRequiredPipePipe(),
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: FILE_SIZE }),
+          new FileTypeValidator({ fileType: /(gif|jpeg|png|jpg)/gi }),
+        ],
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      }),
+    )
+    file: Express.Multer.File,
+  ): Promise<void> {
+    return this.bookingServicesService.updateImage(+id, file);
   }
 
   @ApiOkResponse({
