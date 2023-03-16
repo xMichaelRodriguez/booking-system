@@ -11,15 +11,11 @@ import { ConfigurationService } from './config/configuration';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // statics
-  app.setBaseViewsDir(join(__dirname, '..', 'public'));
-  app.setBaseViewsDir(join(__dirname, '..', 'views'));
-  app.setViewEngine('hbs');
-
   // middlewares
   app.enableCors({
     origin: ['*', 'http://localhost:8081'],
   });
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -33,6 +29,11 @@ async function bootstrap() {
   app.use(compression());
   app.use(helmet());
 
+  // statics
+  app.useStaticAssets(join(__dirname, '..', 'public'));
+
+  app.setBaseViewsDir(join(__dirname, 'modules/auth/', 'views'));
+  app.setViewEngine('hbs');
   // versioning API
 
   const APP_ROUTE_PREFIX = 'api';
@@ -80,3 +81,6 @@ async function bootstrap() {
   });
 }
 bootstrap();
+function serveStatic(arg0: string): any {
+  throw new Error('Function not implemented.');
+}

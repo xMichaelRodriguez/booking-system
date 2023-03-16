@@ -24,6 +24,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { join } from 'path';
 import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
 
 import { AuthService } from './auth.service';
@@ -223,14 +224,17 @@ export class AuthController {
     },
     description: 'NotFoundException',
   })
-  @Patch('/reset-password')
-  resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<void> {
+  @Post('/reset-password/:token')
+  resetPassword(
+    @Param('token') token: string,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ) {
     return this.authService.resetPassword(resetPasswordDto);
   }
 
-  @Get('/reset-password/:token')
-  @Render('auth/reset-password')
-  root(@Param('token') token: string) {
+  @Get('reset-password/:token')
+  @Render('index')
+  resetPasswordView(@Param('token') token: string) {
     return { message: 'Hello world!', token: token };
   }
 

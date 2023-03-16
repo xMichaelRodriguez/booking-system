@@ -171,19 +171,21 @@ export class AuthService {
     // send email(e.g Dispatch an event so MailerModule can send the email  )
   }
 
-  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<void> {
-    const { resetPasswordToken, password } = resetPasswordDto;
-    const user: User = await this.findOneByResetPasswordToken(
-      resetPasswordToken,
-    );
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    // const { resetPasswordToken, password } = resetPasswordDto;
+    // const user: User = await this.findOneByResetPasswordToken(
+    //   resetPasswordToken,
+    // );
 
-    const newPassword = await this.encoderService.encodePassword(password);
+    // const newPassword = await this.encoderService.encodePassword(password);
 
-    this.userRepository.update(user.id, {
-      ...user,
-      password: newPassword,
-      resetPasswordToken: null,
-    });
+    // this.userRepository.update(user.id, {
+    //   ...user,
+    //   password: newPassword,
+    //   resetPasswordToken: null,
+    // });
+
+    return 'pendejo';
   }
 
   async findOneByResetPasswordToken(resetPasswordToken: string): Promise<User> {
