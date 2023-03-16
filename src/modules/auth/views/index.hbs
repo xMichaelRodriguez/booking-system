@@ -16,25 +16,48 @@
   </head>
 
   <body>
-    <main class='container w-25 mt-5 bg-dark rounded-4 shadow'>
-      <article class='h-25 d-flex justify-content-center align-items-center'>
-        <form method='post' action='/api/v1/auth/reset-password/{{token}}'>
-          <div class='mb-3'>
-            <label
-              for='exampleFormControlInput1'
-              class='form-label text-light'
-            >password
-            </label>
-            <input
-              type='text'
-              class='form-control'
-              id='exampleFormControlInput1'
-              placeholder='****'
-            />
+    <main class='container h-auto p-3 mt-5 bg-dark rounded-3 shadow'>
+      {{#unless response}}
+        <article class='mx-3'>
+          <form method='post' action='/api/v1/auth/reset-password/{{token}}'>
+            <div class='mb-3'>
+              <label for='password' class='form-label text-light'>password
+              </label>
+              <input
+                name='password'
+                type='password'
+                class='form-control'
+                id='password'
+                placeholder='****'
+              />
+            </div>
+
+            <button type='submit' class='btn btn-primary'>Confirm</button>
+          </form>
+          {{#if errorMessages}}
+            <div class='alert alert-danger' role='alert'>
+              <ul>
+                {{#each errorMessages}}
+                  <li>{{this}}</li>
+                {{/each}}
+              </ul>
+            </div>
+
+          {{/if}}
+
+        </article>
+
+      {{/unless}}
+      <article class=''>
+        {{#if response}}
+          <div class='alert alert-success' role='alert'>
+            {{response}}
           </div>
-          <button type='submit' class='btn btn-primary'>Confirm</button>
-        </form>
+
+        {{/if}}
+
       </article>
     </main>
+
   </body>
 </html>

@@ -172,20 +172,28 @@ export class AuthService {
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    // const { resetPasswordToken, password } = resetPasswordDto;
-    // const user: User = await this.findOneByResetPasswordToken(
-    //   resetPasswordToken,
-    // );
+    try {
+      const { password, resetPasswordToken } = resetPasswordDto;
 
-    // const newPassword = await this.encoderService.encodePassword(password);
+      const user: User = await this.findOneByResetPasswordToken(
+        resetPasswordToken,
+      );
+      const newPassword = await this.encoderService.encodePassword(password);
 
-    // this.userRepository.update(user.id, {
-    //   ...user,
-    //   password: newPassword,
-    //   resetPasswordToken: null,
-    // });
+      await this.userRepository.update(user.id, {
+        ...user,
+        password: newPassword,
+        resetPasswordToken: null,
+      });
 
-    return 'pendejo';
+      return {
+        response:
+          'Password successfully updated. Please log in with your new password at your next login.',
+      };
+    } catch (error) {
+      this.#logger.error(error.message);
+      throw new InternalServerErrorException('Error trying to reset');
+    }
   }
 
   async findOneByResetPasswordToken(resetPasswordToken: string): Promise<User> {

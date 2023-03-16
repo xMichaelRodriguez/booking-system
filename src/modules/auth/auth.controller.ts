@@ -24,7 +24,8 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { join } from 'path';
+import { validate } from 'class-validator';
+import passport from 'passport';
 import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
 
 import { AuthService } from './auth.service';
@@ -193,6 +194,12 @@ export class AuthController {
     return this.authService.requestResetPassword(requestResetPassword);
   }
 
+  @Get('reset-password/:token')
+  @Render('index')
+  resetPasswordView(@Param('token') token: string) {
+    return { message: 'Hello world!', token: token };
+  }
+
   @ApiOkResponse({ description: 'password successfully reset' })
   @ApiUnauthorizedResponse({
     schema: {
@@ -225,17 +232,23 @@ export class AuthController {
     description: 'NotFoundException',
   })
   @Post('/reset-password/:token')
-  resetPassword(
-    @Param('token') token: string,
-    @Body() resetPasswordDto: ResetPasswordDto,
-  ) {
-    return this.authService.resetPassword(resetPasswordDto);
-  }
-
-  @Get('reset-password/:token')
   @Render('index')
-  resetPasswordView(@Param('token') token: string) {
-    return { message: 'Hello world!', token: token };
+  async resetPassword(
+    @Param('token') token: string,
+    @Body('password')
+    password: string,
+  ) {
+    const dto = new ResetPasswordDto();
+    dto.password = password;
+    dto.resetPasswordToken = token;
+    const errors = await validate(dto);
+    if (errors.length > 0) {
+      const errorMessages = errors.map(error =>
+        Object.values(error.constraints),
+      );
+      return { errorMessages, token };
+    }
+    return await this.authService.resetPassword(dto);
   }
 
   @ApiOkResponse({
