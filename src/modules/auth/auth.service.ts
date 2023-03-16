@@ -157,11 +157,13 @@ export class AuthService {
     try {
       const user: User = await this.findByEmail(email);
 
-      this.userRepository.update(
+      const resetPasswordToken = v4();
+      await this.userRepository.update(
         user.id,
 
-        { ...user, resetPasswordToken: v4() },
+        { ...user, resetPasswordToken },
       );
+      await this.mailService.sendResetPassword(user, resetPasswordToken);
     } catch (error) {
       this.#logger.error(error.message);
       throw new InternalServerErrorException('Error trying to reset password');

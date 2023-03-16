@@ -3,4 +3,5 @@ dist
 **/node_modules/**
 package*
 db
-**/template/*
+**/template/**
+**.hbs

@@ -9,6 +9,8 @@ import {
   UseGuards,
   UseInterceptors,
   Req,
+  Param,
+  Render,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -226,6 +228,12 @@ export class AuthController {
     return this.authService.resetPassword(resetPasswordDto);
   }
 
+  @Get('/reset-password/:token')
+  @Render('auth/reset-password')
+  root(@Param('token') token: string) {
+    return { message: 'Hello world!', token: token };
+  }
+
   @ApiOkResponse({
     description: 'change password',
   })
@@ -261,7 +269,7 @@ export class AuthController {
   })
   @ApiBearerAuth('access-token')
   @Patch('/change-passwords')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
   changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
     @GetUser() user: User,

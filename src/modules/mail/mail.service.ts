@@ -15,7 +15,7 @@ export class MailService {
 
   async sendVerificationUsers(user: User, token: string) {
     const configService = new ConfigurationService();
-    const url = `${configService.getapiBaseUrl()}/api/v1/auth/activate-accounts/?id=${
+    const url = `${configService.getapiBaseUrl()}/auth/activate-accounts/?id=${
       user.id
     }&code=${token}`;
     const sendMailOptions = {
@@ -34,6 +34,30 @@ export class MailService {
       await this.mailerService.sendMail(sendMailOptions);
     } catch (error) {
       this.#logger.error(error.message);
+      throw new InternalServerErrorException(
+        'error trying sent mail verification',
+      );
+    }
+  }
+  async sendResetPassword(user: User, token: string) {
+    const configService = new ConfigurationService();
+    const url = `${configService.getapiBaseUrl()}/auth/reset-password/${token}`;
+    const sendMailOptions = {
+      from: configService.getSender(),
+      to: user.email,
+      subject: 'Your Candy Cake password',
+      template: './reset-password',
+      context: {
+        name: user.username,
+        url,
+      },
+    };
+
+    try {
+      this.#logger.debug('MAIL SEND');
+      await this.mailerService.sendMail(sendMailOptions);
+    } catch (error) {
+      this.#logger.error(error);
       throw new InternalServerErrorException(
         'error trying sent mail verification',
       );
