@@ -25,8 +25,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { validate } from 'class-validator';
-import passport from 'passport';
-import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
+
+import { RoleAuthGuard } from '@/guards/role-auth/role-auth.guard';
 
 import { AuthService } from './auth.service';
 import { GetUser } from './decorators/get-user.decorator';

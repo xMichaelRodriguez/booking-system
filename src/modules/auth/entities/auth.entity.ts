@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsUUID } from 'class-validator';
-import { Booking } from 'src/modules/booking/entities/booking.entity';
-import { Role } from 'src/modules/role/entities/role.entity';
 import {
   Column,
   Entity,
@@ -11,6 +9,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
+import { Booking } from '@modules/booking/entities/booking.entity';
+import { Role } from '@modules/role/entities/role.entity';
 
 @Entity({ name: 'users' })
 export default class User {

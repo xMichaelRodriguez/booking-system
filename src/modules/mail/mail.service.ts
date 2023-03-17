@@ -4,9 +4,10 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { ConfigurationService } from 'src/config/configuration';
 
-import User from '../auth/entities/auth.entity';
+import { ConfigurationService } from '@/config/configuration';
+
+import User from '@modules/auth/entities/auth.entity';
 
 @Injectable()
 export class MailService {

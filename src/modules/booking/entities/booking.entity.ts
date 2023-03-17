@@ -1,7 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import User from 'src/modules/auth/entities/auth.entity';
-import { Services } from 'src/modules/booking-services/entities/services.entity';
-import { Status } from 'src/modules/status/entities/status.entity';
 import {
   Column,
   Entity,
@@ -9,6 +6,10 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
+import User from '@modules/auth/entities/auth.entity';
+import { Services } from '@modules/booking-services/entities/services.entity';
+import { Status } from '@modules/status/entities/status.entity';
 
 @Entity('booking')
 export class Booking {

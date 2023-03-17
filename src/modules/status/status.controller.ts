@@ -20,7 +20,8 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
+
+import { RoleAuthGuard } from '@/guards/role-auth/role-auth.guard';
 
 import { CreateStatusDto } from './dto/create-status.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';

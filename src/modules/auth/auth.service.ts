@@ -13,12 +13,14 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
-import { IGoogleAccount } from 'src/interfaces/gogle.interface';
 import { Repository } from 'typeorm';
 import { v4 } from 'uuid';
 
-import { MailService } from '../mail/mail.service';
-import { RoleRepositoryService } from '../role/role-repository.service';
+import { IGoogleAccount } from '@/interfaces/gogle.interface';
+
+import { MailService } from '@modules/mail/mail.service';
+import { RoleRepositoryService } from '@modules/role/role-repository.service';
+
 import { ActivateUserDto } from './dto/activate-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateAuthDto } from './dto/create-auth.dto';

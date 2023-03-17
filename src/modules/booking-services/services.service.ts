@@ -8,8 +8,9 @@ import { Logger } from '@nestjs/common/services';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { OrderType } from '../../enums/sort-enum';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { OrderType } from '@/enums/sort-enum';
+
+import { CloudinaryService } from '../cloudinary/Cloudinary.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { PaginatedServicesDto } from './dto/pagination-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';

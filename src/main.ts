@@ -6,8 +6,9 @@ import * as compression from 'compression';
 import helmet from 'helmet';
 import { join } from 'path';
 
-import { AppModule } from './app.module';
-import { ConfigurationService } from './config/configuration';
+import { AppModule } from '@/app.module';
+import { ConfigurationService } from '@/config/configuration';
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -81,6 +82,3 @@ async function bootstrap() {
   });
 }
 bootstrap();
-function serveStatic(arg0: string): any {
-  throw new Error('Function not implemented.');
-}

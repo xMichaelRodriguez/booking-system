@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import User from 'src/modules/auth/entities/auth.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
+import User from '@modules/auth/entities/auth.entity';
 
 @Entity('roles')
 export class Role {

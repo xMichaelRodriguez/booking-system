@@ -7,11 +7,13 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { OrderType } from '../../enums/sort-enum';
-import User from '../auth/entities/auth.entity';
-import { Services } from '../booking-services/entities/services.entity';
-import { RoleService } from '../role/role.service';
-import { Status } from '../status/entities/status.entity';
+import { OrderType } from '@/enums/sort-enum';
+
+import User from '@modules/auth/entities/auth.entity';
+import { Services } from '@modules/booking-services/entities/services.entity';
+import { RoleService } from '@modules/role/role.service';
+import { Status } from '@modules/status/entities/status.entity';
+
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { Booking } from './entities/booking.entity';

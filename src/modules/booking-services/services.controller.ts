@@ -31,12 +31,13 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ConfigurationService } from 'src/config/configuration';
-import { FILE_SIZE } from 'src/enums/file-size';
-import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
-import { FileRequiredPipePipe } from 'src/pipes/file-required-pipe.pipe';
 
-import { PaginationQueryDto } from '../../interfaces/pagination-query.dto';
+import { ConfigurationService } from '@/config/configuration';
+import { FILE_SIZE } from '@/enums/file-size';
+import { RoleAuthGuard } from '@/guards/role-auth/role-auth.guard';
+import { PaginationQueryDto } from '@/interfaces/pagination-query.dto';
+import { FileRequiredPipePipe } from '@/pipes/file-required-pipe.pipe';
+
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { Services } from './entities/services.entity';

@@ -20,10 +20,12 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { RoleAuthGuard } from 'src/guards/role-auth/role-auth.guard';
 
-import { GetUser } from '../auth/decorators/get-user.decorator';
-import User from '../auth/entities/auth.entity';
+import { RoleAuthGuard } from '@/guards/role-auth/role-auth.guard';
+
+import { GetUser } from '@modules/auth/decorators/get-user.decorator';
+import User from '@modules/auth/entities/auth.entity';
+
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
