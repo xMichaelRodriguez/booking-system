@@ -168,7 +168,6 @@ export class AuthService {
       this.#logger.error(error.message);
       throw new InternalServerErrorException('Error trying to reset password');
     }
-    // send email(e.g Dispatch an event so MailerModule can send the email  )
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {

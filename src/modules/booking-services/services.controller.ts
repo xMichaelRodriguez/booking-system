@@ -107,6 +107,7 @@ export class BookingServicesController {
   ): Promise<Services> {
     return this.bookingServicesService.create(file, createServiceDto);
   }
+
   @ApiOkResponse({
     description: 'Uptade service',
   })
