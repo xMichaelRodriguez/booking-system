@@ -104,6 +104,9 @@
     "tsconfig-paths": "4.1.0",
     "typescript": "4.7.4"
   },
+  "engines": {
+    "node": "16.x"
+  },
   "jest": {
     "verbose": true,
     "moduleDirectories": [
