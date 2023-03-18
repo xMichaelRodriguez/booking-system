@@ -4,14 +4,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuthModule } from '@/modules/auth/auth.module';
+import { ServicesModule } from '@/modules/booking-services/services.module';
+import { BookingModule } from '@/modules/booking/booking.module';
+import { MailModule } from '@/modules/mail/mail.module';
 import { CloudinaryModule } from '@/modules/media/Cloudinary.module';
-
-import { AuthModule } from '@modules/auth/auth.module';
-import { ServicesModule } from '@modules/booking-services/services.module';
-import { BookingModule } from '@modules/booking/booking.module';
-import { MailModule } from '@modules/mail/mail.module';
-import { RoleModule } from '@modules/role/role.module';
-import { StatusModule } from '@modules/status/status.module';
+import { RoleModule } from '@/modules/role/role.module';
+import { StatusModule } from '@/modules/status/status.module';
 
 // import { redisStore } from 'cache-manager-redis-store';
 

@@ -7,9 +7,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import User from '@modules/auth/entities/auth.entity';
-import { Services } from '@modules/booking-services/entities/services.entity';
-import { Status } from '@modules/status/entities/status.entity';
+import User from '@/modules/auth/entities/auth.entity';
+import { Services } from '@/modules/booking-services/entities/services.entity';
+import { Status } from '@/modules/status/entities/status.entity';
 
 @Entity('booking')
 export class Booking {

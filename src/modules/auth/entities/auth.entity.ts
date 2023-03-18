@@ -10,8 +10,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { Booking } from '@modules/booking/entities/booking.entity';
-import { Role } from '@modules/role/entities/role.entity';
+import { Booking } from '@/modules/booking/entities/booking.entity';
+import { Role } from '@/modules/role/entities/role.entity';
 
 @Entity({ name: 'users' })
 export default class User {

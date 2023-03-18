@@ -6,8 +6,7 @@ import {
 } from '@nestjs/common';
 
 import { ConfigurationService } from '@/config/configuration';
-
-import User from '@modules/auth/entities/auth.entity';
+import User from '@/modules/auth/entities/auth.entity';
 
 @Injectable()
 export class MailService {

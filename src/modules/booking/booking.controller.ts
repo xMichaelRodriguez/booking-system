@@ -22,9 +22,8 @@ import {
 } from '@nestjs/swagger';
 
 import { RoleAuthGuard } from '@/guards/role-auth/role-auth.guard';
-
-import { GetUser } from '@modules/auth/decorators/get-user.decorator';
-import User from '@modules/auth/entities/auth.entity';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
+import User from '@/modules/auth/entities/auth.entity';
 
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
