@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 
 import { OrderType } from '@/enums/sort-enum';
 
-import { CloudinaryService } from '../cloudinary/Cloudinary.service';
+import { CloudinaryService } from '../media/Cloudinary.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { PaginatedServicesDto } from './dto/pagination-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
