@@ -1,6 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { JwtService } from '@nestjs/jwt';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { HttpModule, HttpService } from '@nestjs/axios';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { AuthGuard, PassportModule } from '@nestjs/passport';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
@@ -28,7 +30,7 @@ describe('AuthController', () => {
       imports: [
         PassportModule.register({ defaultStrategy: 'jwt' }),
         RoleModule,
-        TypeOrmModule.forFeature([Role]),
+        HttpModule,
       ],
       controllers: [AuthController],
       providers: [
@@ -44,6 +46,7 @@ describe('AuthController', () => {
         EncoderService,
         JwtService,
         { provide: MailService, useValue: {} },
+        HttpService,
         {
           provide: AuthGuard,
           useFactory: () => {

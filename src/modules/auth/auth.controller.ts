@@ -82,7 +82,7 @@ export class AuthController {
   @ApiOkResponse({
     schema: {
       example: {
-        type: User,
+        User,
         jwt: {
           accessToken: 'examplePlainToken',
         },

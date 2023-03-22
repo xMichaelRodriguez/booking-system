@@ -14,6 +14,7 @@ import { createAuthDto } from 'src/libs/mocks/user.mock';
 import { Repository } from 'typeorm';
 
 import { MailService } from '../mail/mail.service';
+import { RoleRepositoryService } from '../role/role-repository.service';
 import { AuthService } from './auth.service';
 import { EncoderService } from './encoder/encoder.service';
 import User from './entities/auth.entity';
@@ -32,6 +33,10 @@ describe('AuthService', () => {
         {
           provide: getRepositoryToken(User),
           useClass: Repository,
+        },
+        {
+          provide: RoleRepositoryService,
+          useValue: RoleRepositoryService,
         },
         {
           provide: ConfigService,
