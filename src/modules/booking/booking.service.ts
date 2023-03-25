@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  BadRequestException,
   ConflictException,
   InternalServerErrorException,
   NotFoundException,
@@ -65,7 +66,7 @@ export class BookingService {
     }
   }
 
-  async checkReservationValid(date: Date) {
+  async checkReservationValid(date: Date, excludeBookingId?: number) {
     const MINIMUM_TIME_DIFFERENCE = 30;
     const ONE_MINUTE = 60000;
     try {
@@ -77,6 +78,8 @@ export class BookingService {
       date = new Date(date);
 
       return bookings.some(booking => {
+        if (booking.id === excludeBookingId) return false; // Skip excluded booking
+
         const dbReservationTime = new Date(booking.date);
         const diffInMinutes = Math.abs(
           Math.round(
@@ -158,6 +161,10 @@ export class BookingService {
   }
 
   async update(id: number, updateBookingDto: UpdateBookingDto) {
+    const existsBooking = await this.bookingRepository.findOneBy({ id });
+
+    if (!existsBooking) throw new BadRequestException('Booking not found');
+
     const { client, service, status } = await this.findServiceClientStatus(
       updateBookingDto.serviceId,
       updateBookingDto.clientId,
@@ -170,7 +177,10 @@ export class BookingService {
       serviceId: service,
       statusId: status,
     });
-    const isValidBooking = await this.checkReservationValid(bookingToSave.date);
+    const isValidBooking = await this.checkReservationValid(
+      bookingToSave.date,
+      id,
+    );
     if (isValidBooking)
       throw new ConflictException(
         'A reservation already exists for the time you are trying to book',

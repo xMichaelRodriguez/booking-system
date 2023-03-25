@@ -47,6 +47,11 @@ export class Booking {
   statusId: Status;
 
   @ApiProperty({
+    example: 'Example Note ',
+  })
+  @Column({ type: 'varchar', nullable: true, length: 500 })
+  note: string;
+  @ApiProperty({
     example: '2023-03-06T01:30Z',
   })
   @Column({

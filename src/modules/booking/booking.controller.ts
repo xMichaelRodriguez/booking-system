@@ -62,7 +62,7 @@ export class BookingController {
       },
     },
   })
-  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('AUTHENTICATED'))
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
   @Post()
   create(@Body() createBookingDto: CreateBookingDto) {
     return this.bookingService.create(createBookingDto);
