@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "candy-cakes-8efe3",
+  "private_key_id": "b3651178bd9e89fe83defb4188f893771e249724",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC+Rn7HxIkVtxib\nWPU5BPxZIRdf4zJKiOGIeD7aZKlPzB0JAU91+0dPtI0AvVo8+uygg9yCj7VaVbEi\nNAyRCdnREbncagTvoNeUCC9DPQdG2ObpSylZmhsVsWLLzN4E4LxlyUl7YzSOsSwS\ni4Tq7QEnb/1PwPnDdatETF/GGGGqfZT/ktCWhIghRUKtEUWICpuV2zlfvtIQgldp\niHgrVcnjW/YTBX6k5IMTHyKM/mv3PBaNmno4rBOJFUPFJSpVdUkuxO/tsgLdsrXf\nKPWUvwYatSh9uQ2LnMKrJRXj6XhkV9QpJmPYEclJJkx2YsPANXQLz220xEA2rq/J\nm+/Oz+GjAgMBAAECggEAOqxgUdef8gtI0jaHP7Ly4cUbgRz9GBDHgx6ZOx0JPKsT\nVQCLcTUwEzr4s/6vwdgaeZDPwY7w/E8qVQK50Uu5WAfgSUCEDySI9YPklxZNlSIz\nakMcGB42NeVCMtgUqmpmjfiY6Sx5O3sUvQ86yHqW/YNCGILIQeaaDnCCpAJGs5yH\nHH6LSgRUIa5r3eKYodE6TI7Yvlt+kVdFZ1IX3VxWrVTsjpgg4foNM9/C5sX5d3JX\nsX5LKNfl7hcZuFBlRX4LqF5h+quCe/zboe6cmIkkQJh1195Fzs8wGWLq5jEXYQ1z\nIvJ63LDpFyhiTs0BD793grX4WNTnd0yHK5I1+q286QKBgQD1sfuk6J0b5dIpDFa3\nCeEd547rX2ESx9EUv3glUCs4lv90B48yOAiBeKN04cpKUOtH5XgedSFYwXyxWswD\njI/W86Gy0XLDtNFzwO3DqhXEgmqptLghwuJx4AnF0wwqBJ27NsaMCWuckecUwzT/\n3JGHboAYXSMak8sXJDpBZVS1jwKBgQDGQXjSXY7fzH/jMPGaglgbN9ddtOoxr/X/\nh/TLaHvUdBrQqoiPKC0nHPxFMS2RCx1GCd12sYcfSOTfFlkHsyeU/Ff+tX5n0QNQ\nS7rw98aFaHLzOMf/MJo0Ty3awyYTDLScJypMo3fTnGK01A9aGuPKiU03lqxNrRLq\npG06KaPQrQKBgQDUiDCpNzrobgY80dqVHSupxauguXHsYALh0rrodA/fNOcnBH7/\nLu9Up/mlWse1P4g3Oi2NEz9UWpM1i9hc3ZNzmm5uk7WVy20/l01Va2THBxWjVZvO\nQJnHbcimYmjsU+/piXl4m5GF78QX9sB6797Ha3PNH4wFKoGMtB7cgP4kywKBgCQF\n2XI/1aoMemBJkFzGukOXzeYU7UjB9CzOA0jCX12nCwhHNDDu1+V3es8HtIPaRSNo\nv3jFoQuqLwvp/5tKjjKf900spR8v9y4r1HfcTZIH/Hr9IjnYFuzSRj6tnslvUZHd\n++2Y9jjY/YZl0bRJloJCmGk1U3F5tSo1XjNnRYCxAoGAHAW7wcY4rcqrxUT14cuw\nH3551Tvf7Qf2ztTTcx0++w7hNhs1cQYP32vrTUDXRHE6b1z8IZmjs3JmMQYfP6R4\nEYcnp+KrBQWi+Y4Drqu9iIsaHG5fMdKcp4uTEhcHiyUYu41ODNgKz7hyJpzkiHKy\nM175MJ1D1ZMg9BE8bHISxuI=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-iucxy@candy-cakes-8efe3.iam.gserviceaccount.com",
+  "client_id": "101657218233430449990",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-iucxy%40candy-cakes-8efe3.iam.gserviceaccount.com"
+}

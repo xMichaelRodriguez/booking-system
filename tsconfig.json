@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "resolveJsonModule": true,
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -11,6 +12,7 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
+      "@root/*": ["./*"],
       "@/*": ["src/*"]
     },
     "incremental": true,

@@ -33,7 +33,7 @@ module.exports = {
           '/^@shared\\//',
           'module',
           '/^@\\//',
-          '/^@modules\\//',
+          '/^@root\\//',
           ['parent', 'sibling', 'index'],
         ],
         alphabetize: { order: 'asc', ignoreCase: true },

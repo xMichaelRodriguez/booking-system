@@ -322,4 +322,14 @@ export class AuthController {
   async getProfile(@GetUser() user: User) {
     return await this.authService.getProfile(user);
   }
+
+  @Post('/subscriptions')
+  @UseGuards(AuthGuard('jwt'), new RoleAuthGuard('ADMIN', 'AUTHENTICATED'))
+  async subscriptionNotifications(
+    @Body() data: { token: string },
+    @GetUser() user: User,
+  ) {
+    return await this.authService.subscriptionToNotifications(data.token, user);
+    return;
+  }
 }

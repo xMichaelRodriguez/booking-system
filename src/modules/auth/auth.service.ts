@@ -10,8 +10,10 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosError } from 'axios';
+import * as admin from 'firebase-admin';
 import { catchError, firstValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
 import { v4 } from 'uuid';
@@ -332,4 +334,56 @@ export class AuthService {
   async getProfile(user: User) {
     return new User(user);
   }
+
+  async subscriptionToNotifications(token: string, user: User) {
+    await this.userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ deviceToken: token })
+      .where('id = :id', { id: user.id })
+      .execute();
+  }
+
+  @Cron('*/10 * * * * *')
+  async sendNotifications() {
+    const user: User = await this.userRepository.findOneBy({ id: 4 });
+    if (!user) return;
+    const resp = await this.senderMessage(user.deviceToken);
+    console.log(resp);
+  }
+
+  senderMessage = async token => {
+    const message = {
+      notification: {
+        title: 'Candy Cake Ordenes',
+        body: 'La orden mas cercana es a las 10:30',
+      },
+      // android: {
+      //   notification: {
+      //     imageUrl:
+      //       'https://i.pinimg.com/736x/87/2b/46/872b463134db6ed9bb62c59dc2191a2e.jpg',
+      //   },
+      // },
+      // apns: {
+      //   payload: {
+      //     aps: {
+      //       'mutable-content': 1,
+      //     },
+      //   },
+      //   fcm_options: {
+      //     image:
+      //       'https://i.pinimg.com/736x/87/2b/46/872b463134db6ed9bb62c59dc2191a2e.jpg',
+      //   },
+      // },
+      // webpush: {
+      //   headers: {
+      //     image:
+      //       'https://i.pinimg.com/736x/87/2b/46/872b463134db6ed9bb62c59dc2191a2e.jpg',
+      //   },
+      // },
+      token,
+    };
+    const response = await admin.messaging().send(message);
+    return response;
+  };
 }

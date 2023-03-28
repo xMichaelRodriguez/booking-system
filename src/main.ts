@@ -3,11 +3,14 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as compression from 'compression';
+import * as admin from 'firebase-admin';
 import helmet from 'helmet';
 import { join } from 'path';
 
 import { AppModule } from '@/app.module';
 import { ConfigurationService } from '@/config/configuration';
+
+import * as serviceAccount from '@root/candyApiKey.json';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -75,6 +78,16 @@ async function bootstrap() {
   const port = configurationService.getPort();
 
   SwaggerModule.setup(`${APP_ROUTE_PREFIX}/:version/docs`, app, document);
+
+  if (!admin.apps.length) {
+    const serviceAccountObj = JSON.parse(JSON.stringify(serviceAccount));
+    const credentials = admin.credential.cert(serviceAccountObj);
+
+    admin.initializeApp({
+      credential: credentials,
+      // aquí puedes agregar opciones adicionales de configuración si lo necesitas
+    });
+  }
 
   await app.listen(port, async () => {
     const url = await app.getUrl();

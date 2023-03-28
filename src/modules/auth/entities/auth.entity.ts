@@ -102,6 +102,9 @@ export default class User {
   @OneToMany(() => Booking, booking => booking.clientId, { lazy: true })
   booking: Promise<Booking[]>;
 
+  @Column({ name: 'device_token', type: 'varchar', nullable: true })
+  deviceToken: string;
+
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
   }
