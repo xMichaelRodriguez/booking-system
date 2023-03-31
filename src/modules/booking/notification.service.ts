@@ -49,6 +49,9 @@ export class NotificationService {
     }
   }
 
+  // @Cron('*/10 * * * * *', {
+  //   timeZone: 'America/El_Salvador',
+  // })
   @Cron('0 0 9 * * *', {
     timeZone: 'America/El_Salvador',
   })
