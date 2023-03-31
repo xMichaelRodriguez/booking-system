@@ -1,0 +1,4 @@
+export enum NOTIFICATION_PRIORITY {
+  NORMAL = 'NORMAL',
+  HIGH = 'HIGH',
+}

@@ -11,6 +11,7 @@ import { Status } from '@/modules/status/entities/status.entity';
 import { BookingController } from './booking.controller';
 import { BookingService } from './booking.service';
 import { Booking } from './entities/booking.entity';
+import { NotificationService } from './notification.service';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { Booking } from './entities/booking.entity';
     RoleModule,
   ],
   controllers: [BookingController],
-  providers: [BookingService, RoleService],
+  providers: [BookingService, RoleService, NotificationService],
 })
 export class BookingModule {}
