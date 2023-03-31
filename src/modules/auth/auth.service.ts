@@ -341,4 +341,17 @@ export class AuthService {
       .where('id = :id', { id: user.id })
       .execute();
   }
+
+  async checkSubscriptions(id: number): Promise<boolean> {
+    try {
+      const user = await this.userRepository.findOneBy({
+        id,
+      });
+
+      return !!user.deviceToken;
+    } catch (error) {
+      this.#logger.error(error.message);
+      throw new InternalServerErrorException('Something Wen Wrong');
+    }
+  }
 }
