@@ -65,11 +65,18 @@ export class AuthController {
     description: 'Internal Server Error',
   })
   @ApiCreatedResponse({
+    description: 'User Created',
     schema: {
       example: {
-        user: { type: User },
+        user: {
+          id: 1,
+          username: 'JohnDoe',
+          email: 'johndoe@example.com',
+          isActive: true,
+          isGoogleAccount: false,
+        },
         jwt: {
-          accessToken: 'examplePlainToken',
+          accessToken: 'example',
         },
       },
     },
@@ -82,9 +89,15 @@ export class AuthController {
   @ApiOkResponse({
     schema: {
       example: {
-        type: User,
+        user: {
+          id: 1,
+          username: 'JohnDoe',
+          email: 'johndoe@example.com',
+          isActive: true,
+          isGoogleAccount: false,
+        },
         jwt: {
-          accessToken: 'examplePlainToken',
+          accessToken: 'example',
         },
       },
     },
@@ -127,9 +140,15 @@ export class AuthController {
   @ApiOkResponse({
     schema: {
       example: {
-        user: User,
+        user: {
+          id: 1,
+          username: 'JohnDoe',
+          email: 'johndoe@example.com',
+          isActive: true,
+          isGoogleAccount: false,
+        },
         jwt: {
-          accessToken: 'examplePlainToken',
+          accessToken: 'example',
         },
       },
     },
@@ -160,7 +179,23 @@ export class AuthController {
   async googleSignIn(@Req() req) {
     return await this.authService.prepareUserRegister(req);
   }
-
+  @ApiOkResponse({
+    schema: {
+      example: {
+        user: {
+          id: 1,
+          username: 'JohnDoe',
+          email: 'johndoe@example.com',
+          isActive: true,
+          isGoogleAccount: true,
+        },
+        jwt: {
+          accessToken: 'example',
+        },
+      },
+    },
+    description: 'Login with google',
+  })
   @Get('/google-accesses')
   async googleAccess(@Query() params: { access_token: string }) {
     const { access_token } = params;
